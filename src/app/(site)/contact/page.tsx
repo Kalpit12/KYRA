@@ -7,7 +7,7 @@ import { Button } from "@/components/atoms/button";
 import { WhatsAppIcon } from "@/components/atoms/whatsapp-icon";
 import { PageHero } from "@/components/molecules/page-hero";
 import { SectionHeading } from "@/components/molecules/section-heading";
-import { TradeBand } from "@/components/molecules/trade-band";
+import { ContactExploreBand } from "@/components/organisms/contact/contact-explore-band";
 import { kyraContact, kyraShowroomLocation } from "@/lib/data/contact";
 import { createClient } from "@/lib/supabase/client";
 import { z } from "zod";
@@ -265,7 +265,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <TradeBand />
+      <ContactExploreBand />
     </>
   );
 }

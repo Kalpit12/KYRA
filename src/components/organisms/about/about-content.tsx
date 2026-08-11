@@ -5,10 +5,10 @@ import { motion } from "framer-motion";
 import { PageHero } from "@/components/molecules/page-hero";
 import { SectionHeading } from "@/components/molecules/section-heading";
 import { AnimatedStat } from "@/components/molecules/animated-stat";
-import { TradeBand } from "@/components/molecules/trade-band";
 import { AboutCtaSection } from "@/components/organisms/about/about-cta-section";
 import { AboutDivisionsSection } from "@/components/organisms/about/about-divisions-section";
 import { AboutLocationSection } from "@/components/organisms/about/about-location-section";
+import { AboutStandardBand } from "@/components/organisms/about/about-standard-band";
 import {
   aboutIntro,
   aboutAnimatedStats,
@@ -190,8 +190,8 @@ export function AboutContent() {
 
       <AboutDivisionsSection />
       <AboutLocationSection />
+      <AboutStandardBand />
       <AboutCtaSection />
-      <TradeBand />
     </>
   );
 }

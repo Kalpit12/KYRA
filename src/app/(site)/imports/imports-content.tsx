@@ -12,6 +12,7 @@ import { SectionHeading } from "@/components/molecules/section-heading";
 import { WashFaqAccordion } from "@/components/molecules/wash-faq-accordion";
 import { WhatsAppFloat } from "@/components/molecules/whatsapp-float";
 import { Select } from "@/components/atoms/select";
+import { InstagramSection } from "@/components/organisms/imports/instagram-section";
 import { importsFaqs } from "@/lib/data/home";
 import type { Vehicle } from "@/types";
 import {
@@ -337,7 +338,9 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
         </div>
       </section>
 
-      <section className="border-t border-border bg-muted">
+      <InstagramSection />
+
+      <section className="border-t border-border bg-background">
         <div className="container-kyra section-padding !py-24">
           <div className="mx-auto max-w-3xl">
             <SectionHeading label="FAQ" title="Common questions." showChevrons />

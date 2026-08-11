@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import {
   mapVehicleRow,
   type ContactInquiryRow,
@@ -8,46 +9,53 @@ import {
 import type { Vehicle } from "@/types";
 import { latestVehicles as fallbackVehicles } from "@/lib/data/home";
 
+/** Public storefront — sold units are hidden from listings and featured rails. */
+function publicVehicles(vehicles: Vehicle[]): Vehicle[] {
+  return vehicles.filter((v) => v.status !== "sold");
+}
+
 export async function getVehicles(): Promise<Vehicle[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("vehicles")
       .select("*")
+      .neq("status", "sold")
       .order("created_at", { ascending: false });
 
     if (error || !data?.length) {
-      return fallbackVehicles;
+      return publicVehicles(fallbackVehicles);
     }
 
-    return (data as VehicleRow[]).map(mapVehicleRow);
+    return publicVehicles((data as VehicleRow[]).map(mapVehicleRow));
   } catch {
-    return fallbackVehicles;
+    return publicVehicles(fallbackVehicles);
   }
 }
 
 export async function getFeaturedVehicles(): Promise<Vehicle[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("vehicles")
       .select("*")
       .eq("featured", true)
+      .neq("status", "sold")
       .order("created_at", { ascending: false });
 
     if (error || !data?.length) {
-      return fallbackVehicles.filter((v) => v.featured);
+      return publicVehicles(fallbackVehicles.filter((v) => v.featured));
     }
 
-    return (data as VehicleRow[]).map(mapVehicleRow);
+    return publicVehicles((data as VehicleRow[]).map(mapVehicleRow));
   } catch {
-    return fallbackVehicles.filter((v) => v.featured);
+    return publicVehicles(fallbackVehicles.filter((v) => v.featured));
   }
 }
 
 export async function getVehicleBySlug(slug: string): Promise<Vehicle | null> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from("vehicles")
       .select("*")
@@ -55,12 +63,18 @@ export async function getVehicleBySlug(slug: string): Promise<Vehicle | null> {
       .maybeSingle();
 
     if (error || !data) {
-      return fallbackVehicles.find((v) => v.slug === slug) ?? null;
+      const fallback = fallbackVehicles.find((v) => v.slug === slug) ?? null;
+      if (!fallback || fallback.status === "sold") return null;
+      return fallback;
     }
 
-    return mapVehicleRow(data as VehicleRow);
+    const vehicle = mapVehicleRow(data as VehicleRow);
+    if (vehicle.status === "sold") return null;
+    return vehicle;
   } catch {
-    return fallbackVehicles.find((v) => v.slug === slug) ?? null;
+    const fallback = fallbackVehicles.find((v) => v.slug === slug) ?? null;
+    if (!fallback || fallback.status === "sold") return null;
+    return fallback;
   }
 }
 

@@ -7,7 +7,8 @@ import { Eyebrow } from "@/components/atoms/eyebrow";
 import { PageHeroVideo } from "@/components/molecules/page-hero-video";
 import { wrapCatalog, wrapFinishes, type WrapFinishId } from "@/lib/data/simulator";
 
-const CUSTOMS_HERO_VIDEO = "/Custom%20Hero.mp4";
+const CUSTOMS_HERO_VIDEO = "/video/custom-hero.mp4";
+const CUSTOMS_HERO_POSTER = "/video/posters/custom-hero.jpg";
 
 interface SimulatorWelcomeProps {
   onStart: () => void;
@@ -35,7 +36,7 @@ export function SimulatorWelcome({ onStart }: SimulatorWelcomeProps) {
       exit={{ opacity: 0 }}
       className="relative min-h-[52vh] overflow-hidden py-16 md:min-h-[calc(100vh-5rem)] md:py-0"
     >
-      <PageHeroVideo src={CUSTOMS_HERO_VIDEO} />
+      <PageHeroVideo src={CUSTOMS_HERO_VIDEO} poster={CUSTOMS_HERO_POSTER} />
       <div className="absolute inset-0 bg-gradient-to-r from-background/55 via-background/20 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
 

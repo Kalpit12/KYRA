@@ -4,8 +4,28 @@ import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { KyraWordmark } from "@/components/atoms/kyra-logo";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 
 const TAGLINES = ["Import", "Customize", "Maintain"];
+const LOADER_SEEN_KEY = "kyra-loader-seen";
+const MIN_DURATION_MS = 1000;
+const SAFETY_MS = 3200;
+
+function hasSeenLoader(): boolean {
+  try {
+    return sessionStorage.getItem(LOADER_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markLoaderSeen() {
+  try {
+    sessionStorage.setItem(LOADER_SEEN_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
 
 export function LoadingScreen() {
   const mounted = useMounted();
@@ -14,40 +34,48 @@ export function LoadingScreen() {
   const [taglineIndex, setTaglineIndex] = useState(0);
   const [isExiting, setIsExiting] = useState(false);
 
+  useScrollLock(isLoading);
+
   const finishLoading = useCallback(() => {
     setProgress(100);
     setIsExiting(true);
-    setTimeout(() => setIsLoading(false), 900);
+    markLoaderSeen();
+    setTimeout(() => setIsLoading(false), 700);
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
 
-    const start = Date.now();
-    const minDuration = 2400;
-    let frame: number;
-    let loaded = false;
+    if (hasSeenLoader()) {
+      setIsLoading(false);
+      return;
+    }
 
-    const onLoad = () => {
-      loaded = true;
+    const start = Date.now();
+    let frame: number;
+    let ready = document.readyState !== "loading";
+
+    const onReady = () => {
+      ready = true;
     };
 
-    if (document.readyState === "complete") {
-      loaded = true;
-    } else {
-      window.addEventListener("load", onLoad);
+    if (!ready) {
+      document.addEventListener("DOMContentLoaded", onReady);
     }
+
+    // Fonts + DOM only — do not wait on window.load (huge media).
+    void document.fonts?.ready?.then(onReady);
 
     const tick = () => {
       const elapsed = Date.now() - start;
-      const loadFactor = loaded ? 1 : 0.65;
-      const timeFactor = Math.min(elapsed / minDuration, 1);
+      const loadFactor = ready ? 1 : 0.75;
+      const timeFactor = Math.min(elapsed / MIN_DURATION_MS, 1);
       const eased = 1 - Math.pow(1 - timeFactor, 2.2);
       const next = Math.min(98, eased * 100 * loadFactor);
 
       setProgress((prev) => Math.max(prev, next));
 
-      if (loaded && elapsed >= minDuration) {
+      if (ready && elapsed >= MIN_DURATION_MS) {
         finishLoading();
         return;
       }
@@ -59,15 +87,15 @@ export function LoadingScreen() {
 
     const taglineTimer = setInterval(() => {
       setTaglineIndex((i) => (i + 1) % TAGLINES.length);
-    }, 1400);
+    }, 900);
 
-    const safety = setTimeout(finishLoading, 6000);
+    const safety = setTimeout(finishLoading, SAFETY_MS);
 
     return () => {
       cancelAnimationFrame(frame);
       clearInterval(taglineTimer);
       clearTimeout(safety);
-      window.removeEventListener("load", onLoad);
+      document.removeEventListener("DOMContentLoaded", onReady);
     };
   }, [mounted, finishLoading]);
 
@@ -79,9 +107,8 @@ export function LoadingScreen() {
           className="fixed inset-0 z-[9999] overflow-hidden bg-background"
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
+          transition={{ duration: 0.55, ease: [0.76, 0, 0.24, 1] }}
         >
-          {/* Ambient background */}
           <div className="absolute inset-0 noise-overlay" />
           <motion.div
             className="absolute -left-1/4 top-1/4 h-[500px] w-[500px] rounded-full bg-kyra-red/20 blur-[120px]"
@@ -94,23 +121,20 @@ export function LoadingScreen() {
             transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           />
 
-          {/* Corner accents */}
           <div className="absolute left-8 top-8 h-12 w-12 border-l border-t border-border" />
           <div className="absolute right-8 top-8 h-12 w-12 border-r border-t border-border" />
           <div className="absolute bottom-8 left-8 h-12 w-12 border-b border-l border-border" />
           <div className="absolute bottom-8 right-8 h-12 w-12 border-b border-r border-border" />
 
-          {/* Curtain exit */}
           <motion.div
             className="pointer-events-none absolute inset-0 z-10 bg-background"
             initial={{ scaleY: 0 }}
             animate={{ scaleY: isExiting ? 1 : 0 }}
             style={{ transformOrigin: "top" }}
-            transition={{ duration: 0.85, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.7, ease: [0.76, 0, 0.24, 1] }}
           />
 
           <div className="relative flex h-full flex-col items-center justify-center px-6">
-            {/* Progress ring */}
             <div className="relative mb-12">
               <svg
                 width={120}
@@ -173,11 +197,10 @@ export function LoadingScreen() {
               />
             </div>
 
-            {/* Logo */}
             <motion.div
               initial={{ opacity: 0, y: 24, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              transition={{ delay: 0.2, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.15, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="flex items-center justify-center"
             >
               <KyraWordmark size="lg" href={null} />
@@ -186,7 +209,7 @@ export function LoadingScreen() {
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
-              transition={{ delay: 0.7, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
               className="mt-4 h-px w-32 bg-gradient-to-r from-transparent via-kyra-red to-transparent md:w-48"
             />
 
@@ -197,7 +220,7 @@ export function LoadingScreen() {
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.4 }}
+                  transition={{ duration: 0.35 }}
                   className="text-center text-xs uppercase tracking-[0.45em] text-muted-foreground"
                 >
                   {TAGLINES[taglineIndex]}
@@ -208,14 +231,13 @@ export function LoadingScreen() {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
+              transition={{ delay: 0.5 }}
               className="mt-2 text-[10px] uppercase tracking-[0.35em] text-muted-foreground/70"
             >
               Premium Automotive · Nairobi
             </motion.p>
           </div>
 
-          {/* Bottom scan line */}
           <motion.div
             className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-kyra-red/60 to-transparent"
             animate={{ opacity: [0.3, 0.8, 0.3] }}

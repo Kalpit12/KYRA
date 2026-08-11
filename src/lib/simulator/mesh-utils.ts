@@ -172,6 +172,41 @@ export function isWindowGlassMaterial(material: THREE.Material): boolean {
   return physical.transmission !== undefined && physical.transmission > 0.15;
 }
 
+/**
+ * Hum3D sedan quirk: headlight / taillight covers are often named GlassBlack
+ * (same as cabin glass). Lamp covers are thin shells; windshields are large panels.
+ */
+export function isLampCoverGlassMesh(mesh: THREE.Mesh, material?: THREE.Material): boolean {
+  const matName = material?.name || "";
+  const names = material
+    ? [matName]
+    : materialNames(mesh);
+
+  const isGlassBlack = names.some((n) => compactName(n) === "glassblack");
+  if (!isGlassBlack) return false;
+
+  const size = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3());
+  const dims = [size.x, size.y, size.z].sort((a, b) => a - b);
+  const [thin, mid, long] = dims;
+  if (long < 1e-4) return false;
+
+  // Thin cover: small thickness + narrow face vs cabin glass
+  if (thin / long < 0.18 && mid / long < 0.42) return true;
+  // Compact lamp pods (round headlights) that aren't windshield-sized
+  if (long < 2.1 && thin / long < 0.22 && mid / long < 0.55) return true;
+
+  return false;
+}
+
+/** True when GlassBlack (or similar) should render as a clear/red lamp lens */
+export function isHeadlightGlassMaterial(
+  material: THREE.Material,
+  mesh?: THREE.Mesh
+): boolean {
+  if (mesh && isLampCoverGlassMesh(mesh, material)) return true;
+  return isLensGlassMaterial(material);
+}
+
 /** @deprecated Prefer isWindowGlassMaterial / isLensGlassMaterial */
 export function isGlassMaterial(material: THREE.Material): boolean {
   return isWindowGlassMaterial(material) || isLensGlassMaterial(material);

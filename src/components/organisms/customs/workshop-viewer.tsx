@@ -1,18 +1,19 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft, Maximize2, Minimize2 } from "lucide-react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
 import { WorkshopSidebar } from "@/components/organisms/customs/workshop-sidebar";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import {
-  buildQuoteSummary,
   defaultWindowFilmId,
   defaultWrapId,
   getVehicleType,
   getWindowFilmById,
   getWrapById,
+  vehicleTypes,
   type VehicleTypeId,
   type WrapFinishId,
 } from "@/lib/data/simulator";
@@ -48,9 +49,48 @@ export function WorkshopViewer({
   const [tintId, setTintId] = useState(defaultWindowFilmId);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  useScrollLock(true);
+
   const vehicleType = getVehicleType(vehicleTypeId);
   const wrap = getWrapById(wrapId);
   const tint = getWindowFilmById(tintId);
+
+  // Prefetch only the active vehicle model (Draco).
+  useEffect(() => {
+    let cancelled = false;
+    void import("@react-three/drei").then(({ useGLTF }) => {
+      if (cancelled) return;
+      useGLTF.preload(vehicleType.modelPath, true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [vehicleType.modelPath]);
+
+  // Warm default sedan on idle only when viewing another body style.
+  useEffect(() => {
+    const defaultPath = vehicleTypes[0]?.modelPath;
+    if (!defaultPath || defaultPath === vehicleType.modelPath) return;
+
+    const idle =
+      "requestIdleCallback" in window
+        ? window.requestIdleCallback.bind(window)
+        : (cb: () => void) => window.setTimeout(cb, 1800);
+
+    const id = idle(() => {
+      void import("@react-three/drei").then(({ useGLTF }) => {
+        useGLTF.preload(defaultPath, true);
+      });
+    });
+
+    return () => {
+      if ("cancelIdleCallback" in window) {
+        window.cancelIdleCallback(id as number);
+      } else {
+        clearTimeout(id as number);
+      }
+    };
+  }, [vehicleType.modelPath]);
 
   const handleFinishChange = (next: WrapFinishId) => {
     setFinish(next);
@@ -62,10 +102,13 @@ export function WorkshopViewer({
     }
   };
 
-  const quoteSummary = useMemo(
-    () => buildQuoteSummary(vehicleType, finish, wrap, tint),
-    [vehicleType, finish, wrap, tint]
-  );
+  const handleWrapChange = (id: string) => {
+    setWrapId(id);
+    const next = getWrapById(id);
+    if (next.category === "carbon" && finish !== "carbon") {
+      setFinish("carbon");
+    }
+  };
 
   const toggleFullscreen = async () => {
     if (!document.fullscreenElement) {
@@ -129,9 +172,8 @@ export function WorkshopViewer({
         tintId={tintId}
         wrap={wrap}
         tint={tint}
-        quoteSummary={quoteSummary}
         onFinishChange={handleFinishChange}
-        onWrapChange={setWrapId}
+        onWrapChange={handleWrapChange}
         onTintChange={setTintId}
         onVehicleChange={onSwitchVehicle}
       />

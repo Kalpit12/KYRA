@@ -36,3 +36,31 @@ export const kyraShowroomLocation = {
 
 /** @deprecated Prefer kyraShowroomLocation — kept for any remaining Customs map refs */
 export const kyraCustomsLocation = kyraShowroomLocation;
+
+/** Contact-page closer — pathways instead of trade-in */
+export const contactExplore = {
+  eyebrow: "Explore KYRA",
+  title: "Not sure where to start?",
+  subtitle:
+    "Browse curated inventory, configure a wrap, or book a detail — then message us when you’re ready.",
+  links: [
+    {
+      id: "imports",
+      label: "Platinum Imports",
+      description: "Curated inventory",
+      href: "/imports",
+    },
+    {
+      id: "customs",
+      label: "Customs",
+      description: "Wraps & window film",
+      href: "/customs",
+    },
+    {
+      id: "wash",
+      label: "Wash",
+      description: "Premium detailing",
+      href: "/wash",
+    },
+  ],
+} as const;

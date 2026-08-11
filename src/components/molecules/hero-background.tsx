@@ -85,7 +85,12 @@ function probeWebGL(): boolean {
   }
 }
 
-export function HeroBackground() {
+interface HeroBackgroundProps {
+  /** When false, skip WebGL Beams (use with a hero video — XOR media). */
+  enableBeams?: boolean;
+}
+
+export function HeroBackground({ enableBeams = true }: HeroBackgroundProps) {
   const [mode, setMode] = useState<"loading" | "beams" | "fallback">("loading");
 
   useEffect(() => {
@@ -93,7 +98,7 @@ export function HeroBackground() {
       "(prefers-reduced-motion: reduce)"
     ).matches;
 
-    if (reduceMotion || !probeWebGL()) {
+    if (!enableBeams || reduceMotion || !probeWebGL()) {
       setMode("fallback");
       return;
     }
@@ -101,7 +106,7 @@ export function HeroBackground() {
     // Delay one frame so Fast Refresh can finish disposing the old context.
     const id = window.setTimeout(() => setMode("beams"), 120);
     return () => window.clearTimeout(id);
-  }, []);
+  }, [enableBeams]);
 
   useEffect(() => {
     if (mode !== "beams") return;

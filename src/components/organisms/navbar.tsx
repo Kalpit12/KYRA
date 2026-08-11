@@ -7,9 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/button";
-import { KyraBrand } from "@/components/atoms/kyra-logo";
+import { KyraBrand, KyraCustomsBrand, KyraWashBrand } from "@/components/atoms/kyra-logo";
 
 import { useMounted } from "@/lib/hooks/use-mounted";
+import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+
+const LOADER_SEEN_KEY = "kyra-loader-seen";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -26,6 +29,8 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const lightOverHero = pathname === "/" && !isScrolled;
+  const isCustoms = pathname === "/customs" || pathname.startsWith("/customs/");
+  const isWash = pathname === "/wash" || pathname.startsWith("/wash/");
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 40);
@@ -33,25 +38,30 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (!isMobileOpen) return;
+  useScrollLock(isMobileOpen);
 
-    const html = document.documentElement;
-    html.classList.add("lenis-stopped");
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      html.classList.remove("lenis-stopped");
-      document.body.style.overflow = "";
-    };
-  }, [isMobileOpen]);
+  const navEnterDelay =
+    typeof window !== "undefined" &&
+    (() => {
+      try {
+        return sessionStorage.getItem(LOADER_SEEN_KEY) === "1";
+      } catch {
+        return false;
+      }
+    })()
+      ? 0.12
+      : 0.85;
 
   return (
     <>
       <motion.header
         initial={mounted ? { y: -100 } : false}
         animate={{ y: 0 }}
-        transition={{ duration: 0.8, delay: mounted ? 1.2 : 0, ease: [0.76, 0, 0.24, 1] }}
+        transition={{
+          duration: 0.7,
+          delay: mounted ? navEnterDelay : 0,
+          ease: [0.76, 0, 0.24, 1],
+        }}
         className={cn(
           "fixed top-0 right-0 left-0 z-50 transition-all duration-300",
           isScrolled
@@ -59,35 +69,41 @@ export function Navbar() {
             : "bg-transparent py-5"
         )}
       >
-        <div className="container-kyra flex items-center justify-between px-6 md:px-12 lg:px-20">
+        <div className="container-kyra flex items-center gap-6 px-6 md:gap-8 md:px-12 lg:gap-12 lg:px-20">
           <div
             className={cn(
-              "relative z-10 shrink-0",
+              "relative z-10 shrink-0 pr-2",
               lightOverHero &&
                 "[&>a>span>span:last-child>span:first-child]:text-white [&>a>span>span:last-child_small]:text-white/55"
             )}
           >
-            <KyraBrand size="sm" priority removeBackground showTagline />
+            {isCustoms ? (
+              <KyraCustomsBrand size="sm" priority showTagline />
+            ) : isWash ? (
+              <KyraWashBrand size="sm" priority showTagline />
+            ) : (
+              <KyraBrand size="sm" priority removeBackground showTagline />
+            )}
           </div>
 
-          <nav className="hidden items-center gap-8 lg:flex">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "relative pb-1 text-[13px] font-semibold tracking-[0.05em] uppercase transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-kyra-red after:transition-all hover:after:w-full",
-                  lightOverHero
-                    ? "text-white/70 hover:text-white"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
+          <div className="ml-auto hidden items-center gap-8 lg:flex xl:gap-10">
+            <nav className="flex shrink-0 items-center gap-6 xl:gap-8">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "relative whitespace-nowrap pb-1 text-[13px] font-semibold tracking-[0.05em] uppercase transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-kyra-red after:transition-all hover:after:w-full",
+                    lightOverHero
+                      ? "text-white/70 hover:text-white"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
 
-          <div className="hidden lg:block">
             <Button href="/contact" variant="primary" size="sm">
               Book a Viewing
             </Button>
@@ -96,7 +112,7 @@ export function Navbar() {
           <button
             type="button"
             onClick={() => setIsMobileOpen(!isMobileOpen)}
-            className="relative z-10 flex h-11 w-11 min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1.5 lg:hidden"
+            className="relative z-10 ml-auto flex h-11 w-11 min-h-[44px] min-w-[44px] flex-col items-center justify-center gap-1.5 lg:hidden"
             aria-label="Toggle menu"
           >
             {isMobileOpen ? (

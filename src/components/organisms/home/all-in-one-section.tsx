@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import { Eyebrow } from "@/components/atoms/eyebrow";
+import { LazyVideo } from "@/components/molecules/lazy-video";
 
-const ALL_IN_ONE_VIDEO = "/ALL%20IN%20ONE%20KYRA.mp4";
-const VIDEO_POSTER =
-  "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1920&q=80";
+const ALL_IN_ONE_VIDEO = "/video/all-in-one-kyra.mp4";
+const VIDEO_POSTER = "/video/posters/all-in-one-kyra.jpg";
 
 const divisionLinks = [
   { label: "Imports", href: "/imports" },
@@ -17,32 +16,18 @@ const divisionLinks = [
 ] as const;
 
 export function AllInOneSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.play().catch(() => {});
-  }, []);
-
   return (
     <section className="relative overflow-hidden border-y border-border bg-background">
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 
       <div className="relative min-h-[72vh] lg:min-h-[85vh]">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
+        <LazyVideo
+          src={ALL_IN_ONE_VIDEO}
           poster={VIDEO_POSTER}
+          rootMargin="120px 0px"
           className="absolute inset-0 h-full w-full object-cover object-center"
           aria-label="All in One KYRA — imports, customs, and wash"
-        >
-          <source src={ALL_IN_ONE_VIDEO} type="video/mp4" />
-        </video>
+        />
 
         <div className="container-kyra relative z-10 flex min-h-[72vh] flex-col justify-center px-6 py-20 md:px-12 lg:min-h-[85vh] lg:px-20">
           <motion.div

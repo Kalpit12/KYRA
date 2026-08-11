@@ -31,11 +31,11 @@ export const finishPresets: Record<WrapFinishId, FinishPreset> = {
     envMapIntensity: 0.95,
   },
   carbon: {
-    roughness: 0.32,
-    metalness: 0.28,
-    clearcoat: 0.9,
-    clearcoatRoughness: 0.12,
-    envMapIntensity: 1.55,
+    roughness: 0.38,
+    metalness: 0.22,
+    clearcoat: 1,
+    clearcoatRoughness: 0.08,
+    envMapIntensity: 1.75,
   },
 };
 

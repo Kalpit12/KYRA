@@ -12,7 +12,13 @@ import {
   Clock,
 } from "lucide-react";
 import { getDashboardFeed } from "@/lib/admin/vehicles";
+import { washPackages } from "@/lib/data/wash";
 import { formatPrice, cn } from "@/lib/utils";
+
+function washPackageLabel(packageId: string) {
+  const pkg = washPackages.find((p) => p.id === packageId);
+  return pkg ? pkg.name : packageId;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -426,8 +432,8 @@ export default async function AdminDashboardPage() {
                       <p className="font-medium text-foreground">{booking.name}</p>
                       <p className="text-xs text-muted-foreground">{booking.phone}</p>
                     </td>
-                    <td className="px-5 py-3 capitalize text-muted-foreground">
-                      {booking.package_id}
+                    <td className="px-5 py-3 text-muted-foreground">
+                      {washPackageLabel(booking.package_id)}
                       <span className="mt-0.5 block text-xs">{booking.vehicle}</span>
                     </td>
                     <td className="px-5 py-3 text-muted-foreground">

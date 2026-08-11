@@ -69,7 +69,7 @@ export const vehicleTypes: VehicleType[] = [
     description: "Compact SUV with urban agility",
     features: ["City-friendly size", "Efficient performance", "Modern design"],
     vehicleId: "toyota-prado",
-    modelPath: "/models/cs6hv1t8ckpbo.glb",
+    modelPath: "/models/iajrk0ag.glb",
     modelScale: 0.95,
   },
   {
@@ -87,7 +87,7 @@ export const vehicleTypes: VehicleType[] = [
     description: "Athletic performance with striking design",
     features: ["Sport-tuned", "Aerodynamic", "Driver-focused"],
     vehicleId: "bmw-m4",
-    modelPath: "/models/86ql3dghcf0.glb",
+    modelPath: "/models/7t9yfzn1bc.glb",
     modelScale: 0.92,
   },
   {
@@ -331,4 +331,29 @@ export function buildQuoteSummary(
   tint: WindowFilm
 ) {
   return `${vehicleType.name} · ${finish} · ${wrap.name} · ${tint.name}`;
+}
+
+/** Structured inquiry body for admin dashboard (customs wrap quote) */
+export function buildWrapQuoteMessage(input: {
+  vehicleType: VehicleType;
+  finish: WrapFinishId;
+  wrap: WrapOption;
+  tint: WindowFilm;
+  notes?: string;
+}) {
+  const { vehicleType, finish, wrap, tint, notes } = input;
+  const colors = wrap.colors.join(", ");
+  const lines = [
+    "Wrap quote request (Customs simulator)",
+    "",
+    `Vehicle model: ${vehicleType.name}`,
+    `Wrap finish: ${finish}`,
+    `Wrap colour: ${wrap.name}${wrap.brand ? ` · ${wrap.brand}` : ""}${wrap.series ? ` ${wrap.series}` : ""}`,
+    `Wrap hex: ${colors}`,
+    `Window tint: ${tint.name}`,
+  ];
+  if (notes?.trim()) {
+    lines.push("", "Customer notes:", notes.trim());
+  }
+  return lines.join("\n");
 }

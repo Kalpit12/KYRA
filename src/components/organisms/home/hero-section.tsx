@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,9 +9,11 @@ import { Button } from "@/components/atoms/button";
 import { HeroSearchCard } from "@/components/molecules/hero-search-card";
 import { AnimatedStat } from "@/components/molecules/animated-stat";
 import { HeroBackground } from "@/components/molecules/hero-background";
+import { LazyVideo } from "@/components/molecules/lazy-video";
 import { useMounted } from "@/lib/hooks/use-mounted";
 
-const HERO_VIDEO = "/M340i%20B%20roll.mp4";
+const HERO_VIDEO = "/video/m340i-b-roll.mp4";
+const HERO_VIDEO_POSTER = "/video/posters/m340i-b-roll.jpg";
 const HERO_VIDEO_FALLBACK =
   "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=1200&q=80";
 
@@ -95,14 +97,7 @@ function HeroHeadline({ animate }: { animate: boolean }) {
 }
 
 function HeroVideo() {
-  const videoRef = useRef<HTMLVideoElement>(null);
   const [useFallback, setUseFallback] = useState(false);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video || useFallback) return;
-    video.play().catch(() => setUseFallback(true));
-  }, [useFallback]);
 
   if (useFallback) {
     return (
@@ -118,20 +113,14 @@ function HeroVideo() {
   }
 
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      poster={HERO_VIDEO_FALLBACK}
+    <LazyVideo
+      src={HERO_VIDEO}
+      poster={HERO_VIDEO_POSTER}
+      rootMargin="600px 0px"
       onError={() => setUseFallback(true)}
       className="aspect-[4/5] h-auto w-full object-cover contrast-[1.06] saturate-[1.04]"
       aria-label="BMW M340i showcase video"
-    >
-      <source src={HERO_VIDEO} type="video/mp4" />
-    </video>
+    />
   );
 }
 
@@ -140,7 +129,7 @@ export function HeroSection() {
 
   return (
     <section className="relative flex min-h-0 items-center overflow-hidden bg-black pt-24 pb-12 md:min-h-screen md:pt-[110px] md:pb-20">
-      <HeroBackground />
+      <HeroBackground enableBeams={false} />
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 
       <div className="container-kyra relative z-10 px-6 md:px-12 lg:px-20">
@@ -148,7 +137,7 @@ export function HeroSection() {
           <motion.div
             initial={mounted ? { opacity: 0, y: 30 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: mounted ? 1.3 : 0, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.9, delay: mounted ? 0.35 : 0, ease: [0.76, 0, 0.24, 1] }}
           >
             <Eyebrow showChevrons>
               Nairobi&apos;s Home of Performance Imports
@@ -198,7 +187,7 @@ export function HeroSection() {
                   suffix={stat.suffix}
                   pad={stat.pad}
                   label={stat.label}
-                  delay={mounted ? 1600 + index * 180 : 0}
+                  delay={mounted ? 700 + index * 140 : 0}
                 />
               ))}
             </div>
@@ -214,7 +203,7 @@ export function HeroSection() {
           <motion.div
             initial={mounted ? { opacity: 0, x: 40 } : false}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.9, delay: mounted ? 1.55 : 0, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 0.9, delay: mounted ? 0.5 : 0, ease: [0.76, 0, 0.24, 1] }}
             className="relative mx-auto w-full max-w-[520px] xl:max-w-none xl:order-none"
           >
             <div

@@ -11,6 +11,7 @@ import {
   type WrapCategoryId,
   type WrapFinishId,
 } from "@/lib/data/simulator";
+import { carbonSwatchBackground } from "@/lib/simulator/carbon-texture";
 
 interface WrapPopoverProps {
   finish: WrapFinishId;
@@ -99,10 +100,16 @@ export function WrapPopover({
       <div className="mt-3 h-[86px] overflow-y-auto sm:h-[96px]">
         <div className="grid grid-cols-7 gap-2 sm:grid-cols-8">
           {filteredWraps.map((wrap) => {
-            const isGradient = wrap.colors.length > 1;
-            const background = isGradient
-              ? `linear-gradient(135deg, ${wrap.colors.join(", ")})`
-              : wrap.colors[0];
+            const isCarbon = wrap.category === "carbon" || finish === "carbon";
+            const isGradient = !isCarbon && wrap.colors.length > 1;
+            const background = isCarbon
+              ? carbonSwatchBackground(
+                  wrap.colors[0],
+                  wrap.id.includes("forged")
+                )
+              : isGradient
+                ? `linear-gradient(135deg, ${wrap.colors.join(", ")})`
+                : wrap.colors[0];
 
             return (
               <button
@@ -116,7 +123,17 @@ export function WrapPopover({
                     ? "scale-105 border-kyra-red ring-2 ring-kyra-red/30"
                     : "border-transparent"
                 )}
-                style={{ background }}
+                style={
+                  isCarbon
+                    ? {
+                        backgroundColor: "#1a1a1a",
+                        backgroundImage: background,
+                        backgroundSize: "12px 12px",
+                      }
+                    : isGradient
+                      ? { backgroundImage: background }
+                      : { backgroundColor: background }
+                }
                 aria-label={wrap.name}
               />
             );

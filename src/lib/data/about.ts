@@ -1,3 +1,5 @@
+import { kyraContact, kyraShowroomLocation } from "@/lib/data/contact";
+
 export const aboutIntro = {
   label: "Spring Valley, Nairobi",
   title: "Kyra Platinum Imports",
@@ -66,17 +68,17 @@ export const aboutTimeline = [
 export const aboutLocation = {
   label: "Find us",
   title: "Spring Valley showroom.",
-  subtitle: "Visit KYRA in Spring Valley, Nairobi — by appointment for viewings, consultations, and handovers.",
-  address:
-    "Kyra Platinum Imports, Brookside Drive, Spring Valley, Westlands, Nairobi, Kenya",
-  phone: "+254 724 809 009",
-  phoneHref: "tel:+254724809009",
-  email: "kyracustoms.info@gmail.com",
-  emailHref: "mailto:kyracustoms.info@gmail.com",
-  hours: "Mon – Sat: 9AM – 7:30PM\nSun: 9AM – 3:30PM",
-  mapQuery: "Brookside+Drive+Spring+Valley+Westlands+Nairobi+Kenya",
-  directionsUrl:
-    "https://www.google.com/maps/dir/?api=1&destination=Brookside+Drive,+Spring+Valley,+Westlands,+Nairobi,+Kenya",
+  subtitle:
+    "Visit KYRA in Spring Valley, Nairobi — by appointment for viewings, consultations, and handovers.",
+  address: kyraContact.address,
+  phone: kyraContact.phone,
+  phoneHref: kyraContact.phoneHref,
+  email: kyraContact.email,
+  emailHref: kyraContact.emailHref,
+  hours: kyraContact.hours,
+  embedUrl: kyraShowroomLocation.embedUrl,
+  directionsUrl: kyraShowroomLocation.directionsUrl,
+  mapsHref: kyraContact.mapsHref,
 } as const;
 
 export const aboutCta = {
@@ -88,6 +90,32 @@ export const aboutCta = {
   primaryLabel: "Book a Viewing",
   primaryHref: "/contact",
   secondaryLabel: "Get Directions",
-  secondaryHref:
-    "https://www.google.com/maps/dir/?api=1&destination=Brookside+Drive,+Spring+Valley,+Westlands,+Nairobi,+Kenya",
+  secondaryHref: kyraShowroomLocation.directionsUrl,
+} as const;
+
+/** Compact closer band — brand standards (not trade-in) */
+export const aboutStandard = {
+  eyebrow: "The KYRA Standard",
+  title: "How we work.",
+  subtitle:
+    "Every import, wrap, and wash is held to the same bar — deliberate process, honest advice, and finish you can feel.",
+  pillars: [
+    {
+      id: "01",
+      title: "Curated intake",
+      body: "Vehicles and materials are selected with dossier-level scrutiny — not marketplace volume.",
+    },
+    {
+      id: "02",
+      title: "Studio craft",
+      body: "Wraps, tint, and detailing executed in-house under controlled studio conditions.",
+    },
+    {
+      id: "03",
+      title: "Aftercare",
+      body: "Handover support and maintenance pathways so the car stays as sharp as day one.",
+    },
+  ],
+  ctaLabel: "Talk to the team",
+  ctaHref: "/contact",
 } as const;

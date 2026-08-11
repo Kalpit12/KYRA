@@ -49,17 +49,17 @@ export function KyraWordmark({
   tagline = "Import · Customize · Maintain",
 }: KyraWordmarkProps) {
   const mark = (
-    <span className={cn("inline-flex flex-col", className)}>
+    <span className={cn("inline-flex flex-col whitespace-nowrap", className)}>
       <span
         className={cn(
-          "font-hero font-extrabold tracking-[-0.045em] text-foreground",
+          "font-hero font-extrabold tracking-[-0.045em] text-foreground whitespace-nowrap",
           wordmarkSizes[size]
         )}
       >
         KYR<span className="text-kyra-red">Λ</span>
       </span>
       {showTagline && (
-        <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase">
+        <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
           {tagline}
         </small>
       )}
@@ -156,6 +156,144 @@ export function KyraBrand({
         showTagline={showTagline}
         tagline={tagline}
       />
+    </span>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="group inline-flex shrink-0 items-center">
+        {lockup}
+      </Link>
+    );
+  }
+
+  return lockup;
+}
+
+interface KyraCustomsBrandProps {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  href?: string | null;
+  showTagline?: boolean;
+  tagline?: string;
+  priority?: boolean;
+}
+
+const customsWordmarkSizes = {
+  sm: "text-[1.05rem] leading-none sm:text-[1.2rem]",
+  md: "text-xl leading-none",
+  lg: "text-2xl leading-none",
+} as const;
+
+/** Header lockup for /customs — mark + KYRA CUSTOMS + tagline */
+export function KyraCustomsBrand({
+  size = "sm",
+  className,
+  href = "/customs",
+  showTagline = true,
+  tagline = "Divine Elegance",
+  priority = false,
+}: KyraCustomsBrandProps) {
+  const height = heights[size];
+
+  const lockup = (
+    <span className={cn("inline-flex items-center gap-2.5 sm:gap-3", className)}>
+      <span className="inline-flex shrink-0 items-center rounded-sm bg-black px-1 py-0.5">
+        <Image
+          src="/kyra-customs-logo.jpg"
+          alt=""
+          width={640}
+          height={360}
+          priority={priority}
+          aria-hidden
+          className="w-auto object-contain"
+          style={{ width: "auto", height: `${height}px` }}
+        />
+      </span>
+      <span className="inline-flex shrink-0 flex-col whitespace-nowrap">
+        <span
+          className={cn(
+            "font-hero font-extrabold tracking-[-0.03em] text-foreground uppercase whitespace-nowrap",
+            customsWordmarkSizes[size]
+          )}
+        >
+          Kyra <span className="text-kyra-red">Customs</span>
+        </span>
+        {showTagline && (
+          <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
+            {tagline}
+          </small>
+        )}
+      </span>
+    </span>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className="group inline-flex shrink-0 items-center">
+        {lockup}
+      </Link>
+    );
+  }
+
+  return lockup;
+}
+
+interface KyraWashBrandProps {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+  href?: string | null;
+  showTagline?: boolean;
+  tagline?: string;
+  priority?: boolean;
+}
+
+const washWordmarkSizes = {
+  sm: "text-[0.95rem] leading-none sm:text-[1.1rem]",
+  md: "text-xl leading-none",
+  lg: "text-2xl leading-none",
+} as const;
+
+/** Header lockup for /wash — mark + Kyra Premium Wash + tagline */
+export function KyraWashBrand({
+  size = "sm",
+  className,
+  href = "/wash",
+  showTagline = true,
+  tagline = "Clean · Shine · Elevate",
+  priority = false,
+}: KyraWashBrandProps) {
+  const height = heights[size];
+
+  const lockup = (
+    <span className={cn("inline-flex items-center gap-2.5 sm:gap-3", className)}>
+      <span className="inline-flex shrink-0 items-center rounded-sm bg-black px-1 py-0.5">
+        <Image
+          src="/kyra-wash-logo.jpg"
+          alt=""
+          width={640}
+          height={360}
+          priority={priority}
+          aria-hidden
+          className="w-auto object-contain"
+          style={{ width: "auto", height: `${height}px` }}
+        />
+      </span>
+      <span className="inline-flex shrink-0 flex-col whitespace-nowrap">
+        <span
+          className={cn(
+            "font-hero font-extrabold tracking-[-0.03em] text-foreground uppercase whitespace-nowrap",
+            washWordmarkSizes[size]
+          )}
+        >
+          Kyra <span className="text-kyra-red">Premium Wash</span>
+        </span>
+        {showTagline && (
+          <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
+            {tagline}
+          </small>
+        )}
+      </span>
     </span>
   );
 

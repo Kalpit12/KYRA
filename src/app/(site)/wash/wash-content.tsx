@@ -92,17 +92,24 @@ export function WashContent() {
     setSubmitting(true);
     try {
       const parsed = bookingSchema.parse(form);
+      const pkg = getWashPackage(selectedPackage);
       const supabase = createClient();
       const { error: insertError } = await supabase.from("wash_bookings").insert({
-        name: parsed.name,
-        phone: parsed.phone,
-        vehicle: parsed.vehicle,
+        name: parsed.name.trim(),
+        phone: parsed.phone.trim(),
+        vehicle: parsed.vehicle.trim(),
         package_id: selectedPackage,
         booking_date: parsed.date,
         booking_time: parsed.time,
-        notes: parsed.notes || null,
+        notes: parsed.notes?.trim() || null,
+        status: "new",
       });
-      if (insertError) throw insertError;
+      if (insertError) {
+        throw new Error(
+          insertError.message ||
+            `Could not book ${pkg.name}. Please try again or contact us on WhatsApp.`
+        );
+      }
       setSubmitted(true);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -122,8 +129,8 @@ export function WashContent() {
         title="Clean. Shine. Elevate."
         titleNode={<WashHeroTitle />}
         subtitle={washTagline.subtitle}
-        backgroundVideo="/Car%20wash%20hero.mp4"
-        backgroundImage="https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=1920&q=80"
+        backgroundVideo="/video/car-wash-hero.mp4"
+        backgroundImage="/video/posters/car-wash-hero.jpg"
         showChevrons
         showShard={false}
       />

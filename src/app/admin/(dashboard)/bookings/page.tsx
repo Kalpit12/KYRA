@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { WashBookingRow } from "@/lib/admin/types";
+import { washPackages } from "@/lib/data/wash";
+import { formatPrice } from "@/lib/utils";
 
 const statuses: WashBookingRow["status"][] = [
   "new",
@@ -11,6 +13,12 @@ const statuses: WashBookingRow["status"][] = [
   "cancelled",
 ];
 
+function packageLabel(packageId: string) {
+  const pkg = washPackages.find((p) => p.id === packageId);
+  if (!pkg) return packageId;
+  return `${pkg.name} — ${formatPrice(pkg.price)}`;
+}
+
 export default function AdminBookingsPage() {
   const [items, setItems] = useState<WashBookingRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +26,7 @@ export default function AdminBookingsPage() {
 
   const load = async () => {
     setLoading(true);
+    setError(null);
     const supabase = createClient();
     const { data, error: fetchError } = await supabase
       .from("wash_bookings")
@@ -84,7 +93,7 @@ export default function AdminBookingsPage() {
                     {item.vehicle}
                   </p>
                   <p className="mt-1 text-sm text-foreground">
-                    Package: <span className="capitalize">{item.package_id}</span>
+                    Package: {packageLabel(item.package_id)}
                     {" · "}
                     {item.booking_date} at {item.booking_time}
                   </p>

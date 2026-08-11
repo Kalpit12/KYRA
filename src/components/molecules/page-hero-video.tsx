@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { LazyVideo } from "@/components/molecules/lazy-video";
 
 interface PageHeroVideoProps {
   src: string;
@@ -8,27 +8,13 @@ interface PageHeroVideoProps {
 }
 
 export function PageHeroVideo({ src, poster }: PageHeroVideoProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.play().catch(() => {});
-  }, []);
-
   return (
-    <video
-      ref={videoRef}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
+    <LazyVideo
+      src={src}
       poster={poster}
+      rootMargin="400px 0px"
       className="absolute inset-0 h-full w-full object-cover object-center"
       aria-hidden
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    />
   );
 }

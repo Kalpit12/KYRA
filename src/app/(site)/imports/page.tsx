@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     "Browse KYRA Platinum Imports — curated luxury vehicles with full import dossiers, verified history, and white-glove delivery in Nairobi.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function ImportsPage() {
   const vehicles = await getVehicles();

@@ -6,6 +6,7 @@ import { Car, Palette, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/button";
 import { Eyebrow } from "@/components/atoms/eyebrow";
+import { QuoteInquiryModal } from "@/components/organisms/customs/quote-inquiry-modal";
 import {
   filterWraps,
   vehicleTypes,
@@ -18,6 +19,7 @@ import {
   type WrapOption,
   type WindowFilm,
 } from "@/lib/data/simulator";
+import { carbonSwatchBackground } from "@/lib/simulator/carbon-texture";
 
 type SidebarTab = "wrap" | "tint" | "model";
 
@@ -28,7 +30,6 @@ interface WorkshopSidebarProps {
   tintId: string;
   wrap: WrapOption;
   tint: WindowFilm;
-  quoteSummary: string;
   onFinishChange: (finish: WrapFinishId) => void;
   onWrapChange: (id: string) => void;
   onTintChange: (id: string) => void;
@@ -42,7 +43,6 @@ export function WorkshopSidebar({
   tintId,
   wrap,
   tint,
-  quoteSummary,
   onFinishChange,
   onWrapChange,
   onTintChange,
@@ -50,6 +50,7 @@ export function WorkshopSidebar({
 }: WorkshopSidebarProps) {
   const [tab, setTab] = useState<SidebarTab>("wrap");
   const [category, setCategory] = useState<WrapCategoryId>("all");
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   const filteredWraps = useMemo(
     () => filterWraps(category, finish),
@@ -145,8 +146,14 @@ export function WorkshopSidebar({
 
             <div className="grid grid-cols-5 gap-2.5 sm:grid-cols-6 lg:grid-cols-7">
               {filteredWraps.map((item) => {
-                const background =
-                  item.colors.length > 1
+                const isCarbon =
+                  item.category === "carbon" || finish === "carbon";
+                const background = isCarbon
+                  ? carbonSwatchBackground(
+                      item.colors[0],
+                      item.id.includes("forged")
+                    )
+                  : item.colors.length > 1
                     ? `linear-gradient(135deg, ${item.colors.join(", ")})`
                     : item.colors[0];
 
@@ -162,7 +169,17 @@ export function WorkshopSidebar({
                         ? "scale-105 border-kyra-red ring-2 ring-kyra-red/30"
                         : "border-transparent"
                     )}
-                    style={{ background }}
+                    style={
+                      isCarbon
+                        ? {
+                            backgroundColor: "#1a1a1a",
+                            backgroundImage: background,
+                            backgroundSize: "14px 14px",
+                          }
+                        : item.colors.length > 1
+                          ? { backgroundImage: background }
+                          : { backgroundColor: background }
+                    }
                     aria-label={item.name}
                   />
                 );
@@ -236,11 +253,12 @@ export function WorkshopSidebar({
 
       <div className="shrink-0 border-t border-border p-4 sm:p-6">
         <Button
-          href={`/contact?wrap=${encodeURIComponent(quoteSummary)}`}
+          type="button"
           variant="primary"
           size="lg"
           className="w-full"
           magnetic
+          onClick={() => setQuoteOpen(true)}
         >
           Get a Quote
         </Button>
@@ -248,6 +266,15 @@ export function WorkshopSidebar({
           Drag to rotate · scroll to zoom
         </p>
       </div>
+
+      <QuoteInquiryModal
+        open={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+        vehicleType={vehicleType}
+        finish={finish}
+        wrap={wrap}
+        tint={tint}
+      />
     </aside>
   );
 }
