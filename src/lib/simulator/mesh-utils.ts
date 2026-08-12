@@ -185,7 +185,12 @@ export function isLampCoverGlassMesh(mesh: THREE.Mesh, material?: THREE.Material
   const isGlassBlack = names.some((n) => compactName(n) === "glassblack");
   if (!isGlassBlack) return false;
 
-  const size = new THREE.Box3().setFromObject(mesh).getSize(new THREE.Vector3());
+  const box = new THREE.Box3().setFromObject(mesh);
+  const center = box.getCenter(new THREE.Vector3());
+  // Hum3D cabin / quarter glass sits on the belt line; lenses are bumper height
+  if (center.y > 1.0) return false;
+
+  const size = box.getSize(new THREE.Vector3());
   const dims = [size.x, size.y, size.z].sort((a, b) => a - b);
   const [thin, mid, long] = dims;
   if (long < 1e-4) return false;
