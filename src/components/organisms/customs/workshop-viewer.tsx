@@ -6,7 +6,12 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Maximize2, Minimize2 } from "lucide-react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
 import { WorkshopSidebar } from "@/components/organisms/customs/workshop-sidebar";
+import {
+  WorkshopErrorBoundary,
+  WorkshopModelFallback,
+} from "@/components/organisms/customs/three/workshop-error-boundary";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+import { useGlbStatus } from "@/lib/simulator/assert-glb";
 import {
   defaultWindowFilmId,
   defaultWrapId,
@@ -54,6 +59,7 @@ export function WorkshopViewer({
   const vehicleType = getVehicleType(vehicleTypeId);
   const wrap = getWrapById(wrapId);
   const tint = getWindowFilmById(tintId);
+  const modelStatus = useGlbStatus(vehicleType.modelPath);
 
   // Prefetch only the active vehicle model (Draco).
   useEffect(() => {
@@ -152,14 +158,28 @@ export function WorkshopViewer({
         </button>
 
         <div className="relative h-full w-full">
-          <WorkshopCanvas
-            key={vehicleTypeId}
-            modelPath={vehicleType.modelPath}
-            modelScale={vehicleType.modelScale}
-            wrap={wrap}
-            finish={finish}
-            tint={tint}
-          />
+          {modelStatus === "checking" ? (
+            <div className="flex h-full items-center justify-center bg-background">
+              <KyraLoader size="lg" label="Preparing studio" />
+            </div>
+          ) : modelStatus === "invalid" ? (
+            <WorkshopModelFallback message="This vehicle model did not deploy as a valid 3D file. Please try another body style or contact KYRA Customs." />
+          ) : (
+            <WorkshopErrorBoundary
+              key={vehicleTypeId}
+              fallback={
+                <WorkshopModelFallback message="The wrap simulator hit a WebGL error. Try another browser or disable hardware acceleration blockers." />
+              }
+            >
+              <WorkshopCanvas
+                modelPath={vehicleType.modelPath}
+                modelScale={vehicleType.modelScale}
+                wrap={wrap}
+                finish={finish}
+                tint={tint}
+              />
+            </WorkshopErrorBoundary>
+          )}
         </div>
 
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent lg:hidden" />
