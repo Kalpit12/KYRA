@@ -39,6 +39,24 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/models/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/kyra-customs-logo.jpg",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
     ];
   },
   webpack: (config, { dev }) => {

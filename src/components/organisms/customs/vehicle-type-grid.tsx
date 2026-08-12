@@ -5,6 +5,7 @@ import { ArrowLeft, Car, Truck, Box } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Eyebrow } from "@/components/atoms/eyebrow";
 import type { VehicleType, VehicleTypeId } from "@/lib/data/simulator";
+import { preloadSimulatorModel } from "@/lib/simulator/preload";
 
 const iconMap: Record<VehicleTypeId, React.ReactNode> = {
   sedan: <Car className="h-8 w-8" strokeWidth={1.2} />,
@@ -67,6 +68,8 @@ export function VehicleTypeGrid({ vehicles, onSelect, onBack }: VehicleTypeGridP
             transition={{ delay: index * 0.06 }}
             whileHover={{ y: -4 }}
             onClick={() => onSelect(vehicle.id)}
+            onMouseEnter={() => preloadSimulatorModel(vehicle.modelPath)}
+            onFocus={() => preloadSimulatorModel(vehicle.modelPath)}
             className={cn(
               "group min-w-[85vw] snap-start border border-border bg-muted p-6 text-left transition sm:min-w-[280px] md:min-w-0",
               "hover:border-[#44444a] hover:bg-panel"

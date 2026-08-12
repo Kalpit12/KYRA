@@ -18,7 +18,7 @@ export function StudioLights({ preview = false }: { preview?: boolean }) {
       <ambientLight intensity={0.22} />
       <hemisphereLight args={["#ffffff", "#c9c9ce", 0.38]} />
 
-      <Environment frames={1} resolution={256} environmentIntensity={0.78}>
+      <Environment frames={1} resolution={128} environmentIntensity={0.78}>
         <Lightformer
           intensity={1.45}
           rotation-x={Math.PI / 2}

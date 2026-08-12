@@ -16,6 +16,7 @@ import {
 } from "@/components/organisms/customs/three/workshop-error-boundary";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import { useGlbStatus, resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
+import { preloadSimulatorModel, warmSimulatorRuntime } from "@/lib/simulator/preload";
 import { cn } from "@/lib/utils";
 import {
   defaultWindowFilmId,
@@ -79,30 +80,21 @@ export function WorkshopViewer({
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    void import("@react-three/drei").then(({ useGLTF }) => {
-      if (cancelled) return;
-      useGLTF.preload(modelUrl, true);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [modelUrl]);
+    warmSimulatorRuntime();
+    preloadSimulatorModel(vehicleType.modelPath);
+  }, [vehicleType.modelPath]);
 
   useEffect(() => {
     const defaultPath = vehicleTypes[0]?.modelPath;
     if (!defaultPath || defaultPath === vehicleType.modelPath) return;
-    const defaultUrl = resolveSimulatorModelUrl(defaultPath);
 
     const idle =
       "requestIdleCallback" in window
         ? window.requestIdleCallback.bind(window)
-        : (cb: () => void) => window.setTimeout(cb, 1800);
+        : (cb: () => void) => window.setTimeout(cb, 1200);
 
     const id = idle(() => {
-      void import("@react-three/drei").then(({ useGLTF }) => {
-        useGLTF.preload(defaultUrl, true);
-      });
+      preloadSimulatorModel(defaultPath);
     });
 
     return () => {
@@ -112,7 +104,7 @@ export function WorkshopViewer({
         clearTimeout(id as number);
       }
     };
-  }, [modelUrl, vehicleType.modelPath]);
+  }, [vehicleType.modelPath]);
 
   const handleFinishChange = (next: WrapFinishId) => {
     setFinish(next);
@@ -155,11 +147,7 @@ export function WorkshopViewer({
       className="fixed inset-0 z-[100] bg-[#ececee]"
     >
       <div className="absolute inset-0">
-        {modelStatus === "checking" ? (
-          <div className="flex h-full items-center justify-center bg-[#ececee]">
-            <KyraLoader size="lg" label="Preparing studio" />
-          </div>
-        ) : modelStatus === "invalid" ? (
+        {modelStatus === "invalid" ? (
           <WorkshopModelFallback message="This vehicle model did not deploy as a valid 3D file. Please try another body style or contact KYRA Customs." />
         ) : (
           <WorkshopErrorBoundary

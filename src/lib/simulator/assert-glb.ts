@@ -15,10 +15,10 @@ export function resolveSimulatorModelUrl(path: string) {
   return `${base}?v=${SIMULATOR_MODEL_CACHE_VERSION}`;
 }
 
-async function readGlbMagic(url: string, signal: AbortSignal) {
+async function readGlbMagic(url: string, signal: AbortSignal, cache: RequestCache) {
   const res = await fetch(url, {
     signal,
-    cache: "no-store",
+    cache,
     headers: { Range: "bytes=0-3" },
   });
 
@@ -36,16 +36,18 @@ async function readGlbMagic(url: string, signal: AbortSignal) {
 
 /** Reject Git LFS pointers / HTML error pages before Three.js tries to parse them. */
 export function useGlbStatus(modelPath: string): GlbStatus {
-  const [status, setStatus] = useState<GlbStatus>("checking");
+  const [status, setStatus] = useState<GlbStatus>("ready");
 
   useEffect(() => {
     let active = true;
     const controller = new AbortController();
     const url = resolveSimulatorModelUrl(modelPath);
+    const fetchCache: RequestCache =
+      process.env.NODE_ENV === "production" ? "default" : "no-store";
 
     async function check() {
       try {
-        const magic = await readGlbMagic(url, controller.signal);
+        const magic = await readGlbMagic(url, controller.signal, fetchCache);
         if (!active) return;
 
         if (magic === GLB_MAGIC) {
@@ -68,7 +70,7 @@ export function useGlbStatus(modelPath: string): GlbStatus {
           const head = await fetch(url, {
             method: "HEAD",
             signal: controller.signal,
-            cache: "no-store",
+            cache: fetchCache,
           });
           const length = Number(head.headers.get("content-length") || 0);
           if (active && head.ok && length >= MIN_GLB_BYTES) {
@@ -83,7 +85,7 @@ export function useGlbStatus(modelPath: string): GlbStatus {
       }
     }
 
-    setStatus("checking");
+    setStatus("ready");
     void check();
 
     return () => {
