@@ -21,8 +21,27 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      // Static media only — never cache the /customs page HTML (stale HTML → 404 webpack chunks after deploy)
       {
-        source: "/customs/:path*",
+        source: "/customs/gallery/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/customs/posters/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/customs/:file.mp4",
         headers: [
           {
             key: "Cache-Control",
