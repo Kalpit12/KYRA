@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Pause, Play, Volume2, VolumeX } from "lucide-react";
 import { SectionHeading } from "@/components/molecules/section-heading";
 import { customsHighlights } from "@/lib/data/wraps";
+import { prefetchStaticImage, prefetchStaticVideo } from "@/lib/media-prefetch";
 import { cn } from "@/lib/utils";
 
 function HighlightReel({
@@ -34,15 +35,16 @@ function HighlightReel({
     const io = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
+          prefetchStaticImage(poster);
           setReady(true);
           io.disconnect();
         }
       },
-      { rootMargin: "160px 0px", threshold: 0.01 }
+      { rootMargin: "320px 0px", threshold: 0.01 }
     );
     io.observe(video);
     return () => io.disconnect();
-  }, []);
+  }, [poster]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -104,6 +106,8 @@ function HighlightReel({
         <button
           type="button"
           onClick={() => void togglePlay()}
+          onMouseEnter={() => prefetchStaticVideo(src)}
+          onFocus={() => prefetchStaticVideo(src)}
           className="absolute inset-0 z-10"
           aria-label={playing ? `Pause ${title}` : `Play ${title}`}
         />

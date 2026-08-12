@@ -1,18 +1,18 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
 import { Canvas } from "@react-three/fiber";
 import {
   ContactShadows,
-  Environment,
   Html,
   OrbitControls,
   PerspectiveCamera,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { CarModel } from "@/components/organisms/customs/three/car-model";
-import { StudioFloor } from "@/components/organisms/customs/three/studio-floor";
+import { StudioEnvironment } from "@/components/organisms/customs/three/studio-environment";
+import { StudioLights } from "@/components/organisms/customs/three/studio-lights";
 import { silenceThreeClockDeprecation } from "@/lib/three/silence-clock-deprecation";
 import type { WrapFinishId, WrapOption, WindowFilm } from "@/lib/data/simulator";
 
@@ -47,11 +47,12 @@ export function WorkshopCanvas({
   performanceMode = "full",
 }: WorkshopCanvasProps) {
   const isPreview = performanceMode === "preview";
+  const [autoRotate, setAutoRotate] = useState(!isPreview);
 
   return (
     <Canvas
       shadows={!isPreview}
-      dpr={isPreview ? 1 : [1, 1.5]}
+      dpr={isPreview ? 1 : [1, 1.6]}
       frameloop="always"
       gl={{
         antialias: !isPreview,
@@ -62,83 +63,62 @@ export function WorkshopCanvas({
         depth: true,
       }}
       onCreated={({ gl }) => {
-        gl.toneMappingExposure = isPreview ? 1.05 : 1.15;
-        // Three r183+: PCFSoftShadowMap is deprecated — set explicitly to avoid per-frame warns
+        gl.toneMappingExposure = isPreview ? 1.06 : 1.04;
         gl.shadowMap.enabled = !isPreview;
         gl.shadowMap.type = THREE.PCFShadowMap;
       }}
       className="h-full w-full"
     >
-      <color attach="background" args={["#0a0a0a"]} />
-      {!isPreview && <fog attach="fog" args={["#0a0a0a", 14, 32]} />}
+      <color attach="background" args={["#ececee"]} />
 
       <PerspectiveCamera
         makeDefault
-        position={isPreview ? [3.8, 1.55, 4.6] : [4.5, 1.8, 5.5]}
-        fov={isPreview ? 42 : 38}
+        position={isPreview ? [3.4, 1.35, 4.4] : [3.55, 1.28, 4.85]}
+        fov={isPreview ? 40 : 34}
       />
       <OrbitControls
-        target={[0, 0.85, 0]}
+        target={[0, 0.72, 0]}
         enablePan={false}
         enableZoom={!isPreview}
-        autoRotate={isPreview}
-        autoRotateSpeed={0.55}
-        minDistance={3.5}
-        maxDistance={9}
-        minPolarAngle={Math.PI / 6}
-        maxPolarAngle={Math.PI / 2.1}
+        autoRotate={autoRotate}
+        autoRotateSpeed={isPreview ? 0.55 : 0.22}
+        minDistance={3.1}
+        maxDistance={8.5}
+        minPolarAngle={Math.PI / 5.5}
+        maxPolarAngle={Math.PI / 2.12}
         enableDamping
         dampingFactor={0.06}
+        onStart={() => setAutoRotate(false)}
       />
 
-      <ambientLight intensity={isPreview ? 0.7 : 0.5} />
-      <hemisphereLight args={["#ffffff", "#1a1020", isPreview ? 0.75 : 0.55]} />
-      <directionalLight
-        position={[5, 8, 4]}
-        intensity={isPreview ? 1.1 : 1.25}
-        castShadow={!isPreview}
-        shadow-mapSize={isPreview ? [256, 256] : [512, 512]}
-      />
-      {!isPreview && (
-        <>
-          <directionalLight position={[-4, 3, -2]} intensity={0.4} color="#c8d4ff" />
-          <spotLight
-            position={[-3, 6, 2]}
-            angle={0.45}
-            penumbra={0.55}
-            intensity={0.9}
-            color="#fff5f0"
-          />
-          <pointLight position={[1.4, 0.35, 1.1]} intensity={0.4} color="#ffffff" distance={4} />
-          <pointLight position={[-1.4, 0.35, 1.1]} intensity={0.4} color="#ffffff" distance={4} />
-          <pointLight position={[0, 1.2, -3.2]} intensity={0.4} color="#ff3b3b" />
-        </>
-      )}
+      <StudioLights preview={isPreview} />
 
       <Suspense
         fallback={
-          <LoadingFallback label={isPreview ? "Loading preview" : "Loading workshop"} />
+          <LoadingFallback label={isPreview ? "Loading preview" : "Loading studio"} />
         }
       >
-        {!isPreview && <Environment preset="city" environmentIntensity={0.75} />}
-        <StudioFloor animated={!isPreview} receiveShadow={!isPreview} />
-        <CarModel
-          modelPath={modelPath}
-          modelScale={modelScale}
-          wrap={wrap}
-          finish={finish}
-          tint={tint}
-          enableShadows={!isPreview}
-          liteMaterials={isPreview}
-        />
+        <StudioEnvironment receiveShadow={!isPreview} />
+        <group position={[0, 0.07, 0]}>
+          <CarModel
+            modelPath={modelPath}
+            modelScale={modelScale}
+            wrap={wrap}
+            finish={finish}
+            tint={tint}
+            enableShadows={!isPreview}
+            liteMaterials={isPreview}
+          />
+        </group>
         {!isPreview && (
           <ContactShadows
-            position={[0, 0.01, 0]}
-            opacity={0.4}
+            position={[0, 0.07, 0]}
+            opacity={0.2}
             scale={14}
-            blur={1.6}
-            far={5}
-            resolution={256}
+            blur={2.8}
+            far={6.5}
+            color="#2a2a2e"
+            resolution={512}
             frames={1}
           />
         )}

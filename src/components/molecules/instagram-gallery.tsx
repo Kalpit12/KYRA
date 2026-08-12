@@ -36,7 +36,8 @@ export function InstagramGallery({
         "section-padding border-t border-border bg-muted",
         className
       )}
-    >      <div className="container-kyra">
+    >
+      <div className="container-kyra">
         <div className="flex flex-col items-center gap-4 text-center">
           <SectionHeading
             label="Follow Us"
@@ -93,6 +94,9 @@ export function InstagramGallery({
                   fill
                   className="pointer-events-none object-cover transition-transform duration-700 group-hover:scale-[1.04]"
                   sizes="(max-width: 640px) 50vw, 33vw"
+                  priority={index < 3}
+                  loading={index < 3 ? undefined : "lazy"}
+                  fetchPriority={index < 3 ? "high" : "low"}
                 />
 
                 <div

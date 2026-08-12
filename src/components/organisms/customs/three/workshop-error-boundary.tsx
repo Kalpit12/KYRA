@@ -13,7 +13,7 @@ interface WorkshopErrorBoundaryState {
 
 export function WorkshopModelFallback({ message }: { message?: string }) {
   return (
-    <div className="flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-3 bg-background px-6 text-center">
+    <div className="flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-3 bg-[#ececee] px-6 text-center">
       <p className="font-mono text-[10px] tracking-[0.16em] text-kyra-red uppercase">
         Studio preview
       </p>

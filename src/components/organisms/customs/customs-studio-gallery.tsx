@@ -10,6 +10,7 @@ import {
   customsGalleryFlat,
   customsGalleryProjects,
 } from "@/lib/data/wraps";
+import { prefetchStaticImage } from "@/lib/media-prefetch";
 
 export function CustomsStudioGallery() {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -46,7 +47,15 @@ export function CustomsStudioGallery() {
     setProjectIndex((i) => (i - 1 + projectCount) % projectCount);
   }, [projectCount]);
 
-  // Auto-advance to the next car every 3s (gallery stays centered)
+  // Warm the first two shots of the active project before the user opens lightbox
+  useEffect(() => {
+    projectImages.slice(0, 2).forEach((image) => prefetchStaticImage(image.src));
+  }, [projectImages]);
+
+  const warmProject = useCallback((projectId: string) => {
+    const project = customsGalleryProjects.find((item) => item.id === projectId);
+    project?.images.slice(0, 3).forEach((image) => prefetchStaticImage(image.src));
+  }, []);
   useEffect(() => {
     if (paused || activeLightbox || projectCount <= 1) return;
     const timer = window.setInterval(goNextCar, 3000);
@@ -111,6 +120,8 @@ export function CustomsStudioGallery() {
                 key={project.id}
                 type="button"
                 onClick={() => setProjectIndex(index)}
+                onMouseEnter={() => warmProject(project.id)}
+                onFocus={() => warmProject(project.id)}
                 className={
                   selected
                     ? "shrink-0 border border-kyra-red bg-kyra-red/10 px-3 py-1.5 font-mono text-[10px] tracking-[0.1em] text-foreground uppercase"
@@ -152,8 +163,10 @@ export function CustomsStudioGallery() {
                     alt={image.alt}
                     fill
                     className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                    sizes="220px"
+                    sizes="(max-width: 640px) 160px, (max-width: 768px) 190px, 220px"
                     priority={index < 2}
+                    loading={index < 2 ? undefined : "lazy"}
+                    fetchPriority={index < 2 ? "high" : "low"}
                   />
                   <div
                     className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80 transition-opacity group-hover:opacity-95"

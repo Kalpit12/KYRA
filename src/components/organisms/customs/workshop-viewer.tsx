@@ -1,17 +1,22 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Maximize2, Minimize2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeft, Car, Maximize2, Minimize2, Palette, Sun } from "lucide-react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
-import { WorkshopSidebar } from "@/components/organisms/customs/workshop-sidebar";
+import { Button } from "@/components/atoms/button";
+import { QuoteInquiryModal } from "@/components/organisms/customs/quote-inquiry-modal";
+import { TintPopover } from "@/components/organisms/customs/tint-popover";
+import { VehicleSwitcher } from "@/components/organisms/customs/vehicle-switcher";
+import { WrapPopover } from "@/components/organisms/customs/wrap-popover";
 import {
   WorkshopErrorBoundary,
   WorkshopModelFallback,
 } from "@/components/organisms/customs/three/workshop-error-boundary";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
-import { useGlbStatus } from "@/lib/simulator/assert-glb";
+import { useGlbStatus, resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
+import { cn } from "@/lib/utils";
 import {
   defaultWindowFilmId,
   defaultWrapId,
@@ -31,12 +36,14 @@ const WorkshopCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center bg-background">
+      <div className="flex h-full items-center justify-center bg-[#ececee]">
         <KyraLoader size="lg" label="Preparing studio" />
       </div>
     ),
   }
 );
+
+type StudioPanel = "model" | "wrap" | "tint";
 
 interface WorkshopViewerProps {
   vehicleTypeId: VehicleTypeId;
@@ -49,34 +56,43 @@ export function WorkshopViewer({
   onExit,
   onSwitchVehicle,
 }: WorkshopViewerProps) {
+  const rootRef = useRef<HTMLDivElement>(null);
   const [finish, setFinish] = useState<WrapFinishId>("gloss");
   const [wrapId, setWrapId] = useState(defaultWrapId);
   const [tintId, setTintId] = useState(defaultWindowFilmId);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [activePanel, setActivePanel] = useState<StudioPanel | null>(null);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   useScrollLock(true);
 
   const vehicleType = getVehicleType(vehicleTypeId);
   const wrap = getWrapById(wrapId);
   const tint = getWindowFilmById(tintId);
+  const modelUrl = resolveSimulatorModelUrl(vehicleType.modelPath);
   const modelStatus = useGlbStatus(vehicleType.modelPath);
 
-  // Prefetch only the active vehicle model (Draco).
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
     void import("@react-three/drei").then(({ useGLTF }) => {
       if (cancelled) return;
-      useGLTF.preload(vehicleType.modelPath, true);
+      useGLTF.preload(modelUrl, true);
     });
     return () => {
       cancelled = true;
     };
-  }, [vehicleType.modelPath]);
+  }, [modelUrl]);
 
-  // Warm default sedan on idle only when viewing another body style.
   useEffect(() => {
     const defaultPath = vehicleTypes[0]?.modelPath;
     if (!defaultPath || defaultPath === vehicleType.modelPath) return;
+    const defaultUrl = resolveSimulatorModelUrl(defaultPath);
 
     const idle =
       "requestIdleCallback" in window
@@ -85,7 +101,7 @@ export function WorkshopViewer({
 
     const id = idle(() => {
       void import("@react-three/drei").then(({ useGLTF }) => {
-        useGLTF.preload(defaultPath, true);
+        useGLTF.preload(defaultUrl, true);
       });
     });
 
@@ -96,7 +112,7 @@ export function WorkshopViewer({
         clearTimeout(id as number);
       }
     };
-  }, [vehicleType.modelPath]);
+  }, [modelUrl, vehicleType.modelPath]);
 
   const handleFinishChange = (next: WrapFinishId) => {
     setFinish(next);
@@ -117,85 +133,173 @@ export function WorkshopViewer({
   };
 
   const toggleFullscreen = async () => {
+    const node = rootRef.current;
+    if (!node) return;
     if (!document.fullscreenElement) {
-      await document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
+      await node.requestFullscreen();
     } else {
       await document.exitFullscreen();
-      setIsFullscreen(false);
     }
+  };
+
+  const togglePanel = (panel: StudioPanel) => {
+    setActivePanel((current) => (current === panel ? null : panel));
   };
 
   return (
     <motion.div
+      ref={rootRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] flex h-[100dvh] flex-col bg-background lg:flex-row"
+      className="fixed inset-0 z-[100] bg-[#ececee]"
     >
-      <div className="relative flex h-[42dvh] shrink-0 flex-col lg:h-auto lg:min-h-0 lg:flex-1">
-        <div className="absolute top-4 left-4 z-20 flex items-center gap-3 sm:top-6 sm:left-6">
+      <div className="absolute inset-0">
+        {modelStatus === "checking" ? (
+          <div className="flex h-full items-center justify-center bg-[#ececee]">
+            <KyraLoader size="lg" label="Preparing studio" />
+          </div>
+        ) : modelStatus === "invalid" ? (
+          <WorkshopModelFallback message="This vehicle model did not deploy as a valid 3D file. Please try another body style or contact KYRA Customs." />
+        ) : (
+          <WorkshopErrorBoundary
+            key={vehicleTypeId}
+            fallback={
+              <WorkshopModelFallback message="The wrap simulator hit a WebGL error. Try another browser or disable hardware acceleration blockers." />
+            }
+          >
+            <WorkshopCanvas
+              modelPath={modelUrl}
+              modelScale={vehicleType.modelScale}
+              wrap={wrap}
+              finish={finish}
+              tint={tint}
+            />
+          </WorkshopErrorBoundary>
+        )}
+      </div>
+
+      <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-auto absolute top-4 left-4 sm:top-6 sm:left-6">
           <button
             type="button"
             onClick={onExit}
-            className="flex min-h-[44px] items-center gap-2 border border-border bg-background/80 px-4 py-2.5 font-mono text-xs tracking-[0.06em] text-foreground uppercase backdrop-blur-md transition hover:border-kyra-red"
+            className="flex min-h-[44px] items-center gap-2 border border-white/15 bg-black/55 px-4 py-2.5 font-mono text-xs tracking-[0.08em] text-white uppercase backdrop-blur-md transition hover:border-kyra-red"
           >
             <ArrowLeft size={16} />
             Exit
           </button>
-          <span className="hidden border border-kyra-red/30 bg-kyra-red/10 px-3 py-1 font-mono text-[10px] tracking-[0.12em] text-kyra-red uppercase sm:inline">
-            3D Live Preview
-          </span>
         </div>
 
-        <button
-          type="button"
-          onClick={toggleFullscreen}
-          className="absolute top-4 right-4 z-20 flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center border border-border bg-background/80 text-foreground backdrop-blur-md transition hover:border-kyra-red sm:top-6 sm:right-6"
-          aria-label="Toggle fullscreen"
-        >
-          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-        </button>
+        <div className="pointer-events-auto absolute top-4 right-4 flex items-center gap-2 sm:top-6 sm:right-6">
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={() => setQuoteOpen(true)}
+          >
+            Get a Quote
+          </Button>
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center border border-white/15 bg-black/55 text-white backdrop-blur-md transition hover:border-kyra-red"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          </button>
+        </div>
 
-        <div className="relative h-full w-full">
-          {modelStatus === "checking" ? (
-            <div className="flex h-full items-center justify-center bg-background">
-              <KyraLoader size="lg" label="Preparing studio" />
-            </div>
-          ) : modelStatus === "invalid" ? (
-            <WorkshopModelFallback message="This vehicle model did not deploy as a valid 3D file. Please try another body style or contact KYRA Customs." />
-          ) : (
-            <WorkshopErrorBoundary
-              key={vehicleTypeId}
-              fallback={
-                <WorkshopModelFallback message="The wrap simulator hit a WebGL error. Try another browser or disable hardware acceleration blockers." />
-              }
-            >
-              <WorkshopCanvas
-                modelPath={vehicleType.modelPath}
-                modelScale={vehicleType.modelScale}
-                wrap={wrap}
-                finish={finish}
-                tint={tint}
+        <div className="pointer-events-auto absolute bottom-5 left-1/2 w-[min(96vw,40rem)] -translate-x-1/2 sm:bottom-8">
+          <AnimatePresence>
+            {activePanel === "model" && (
+              <VehicleSwitcher
+                key="model"
+                currentId={vehicleTypeId}
+                onSelect={(id) => {
+                  onSwitchVehicle(id);
+                  setActivePanel(null);
+                }}
+                onClose={() => setActivePanel(null)}
               />
-            </WorkshopErrorBoundary>
-          )}
-        </div>
+            )}
+            {activePanel === "wrap" && (
+              <WrapPopover
+                key="wrap"
+                finish={finish}
+                wrapId={wrapId}
+                onFinishChange={handleFinishChange}
+                onWrapChange={handleWrapChange}
+                onClose={() => setActivePanel(null)}
+              />
+            )}
+            {activePanel === "tint" && (
+              <TintPopover
+                key="tint"
+                tintId={tintId}
+                onTintChange={setTintId}
+                onClose={() => setActivePanel(null)}
+              />
+            )}
+          </AnimatePresence>
 
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-background to-transparent lg:hidden" />
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                {
+                  id: "model" as const,
+                  label: "Vehicle",
+                  detail: vehicleType.name,
+                  icon: Car,
+                },
+                {
+                  id: "wrap" as const,
+                  label: "Wrap",
+                  detail: wrap.name,
+                  icon: Palette,
+                },
+                {
+                  id: "tint" as const,
+                  label: "Tint",
+                  detail: tint.name,
+                  icon: Sun,
+                },
+              ] as const
+            ).map((item) => {
+              const active = activePanel === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => togglePanel(item.id)}
+                  className={cn(
+                    "flex min-h-[72px] flex-col items-center justify-center gap-1 border px-2 py-3 text-white backdrop-blur-md transition sm:min-h-[80px] sm:px-3",
+                    active
+                      ? "border-kyra-red bg-black/75"
+                      : "border-white/12 bg-black/55 hover:border-white/30"
+                  )}
+                >
+                  <item.icon size={18} className={active ? "text-kyra-red" : "text-white/80"} />
+                  <span className="font-mono text-[10px] tracking-[0.14em] uppercase">
+                    {item.label}
+                  </span>
+                  <span className="max-w-full truncate font-mono text-[9px] tracking-[0.06em] text-white/55 uppercase">
+                    {item.detail}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
 
-      <WorkshopSidebar
-        vehicleTypeId={vehicleTypeId}
+      <QuoteInquiryModal
+        open={quoteOpen}
+        onClose={() => setQuoteOpen(false)}
+        vehicleType={vehicleType}
         finish={finish}
-        wrapId={wrapId}
-        tintId={tintId}
         wrap={wrap}
         tint={tint}
-        onFinishChange={handleFinishChange}
-        onWrapChange={handleWrapChange}
-        onTintChange={setTintId}
-        onVehicleChange={onSwitchVehicle}
       />
     </motion.div>
   );

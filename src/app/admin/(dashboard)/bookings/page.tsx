@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Select } from "@/components/atoms/select";
 import { createClient } from "@/lib/supabase/client";
 import type { WashBookingRow } from "@/lib/admin/types";
 import { washPackages } from "@/lib/data/wash";
 import { formatPrice } from "@/lib/utils";
 
-const statuses: WashBookingRow["status"][] = [
-  "new",
-  "confirmed",
-  "completed",
-  "cancelled",
+const statusOptions: { value: WashBookingRow["status"]; label: string }[] = [
+  { value: "new", label: "New" },
+  { value: "confirmed", label: "Confirmed" },
+  { value: "completed", label: "Completed" },
+  { value: "cancelled", label: "Cancelled" },
 ];
 
 function packageLabel(packageId: string) {
@@ -98,25 +99,27 @@ export default function AdminBookingsPage() {
                     {item.booking_date} at {item.booking_time}
                   </p>
                   <p className="mt-1 font-mono text-[10px] tracking-[0.1em] text-kyra-steel uppercase">
-                    {new Date(item.created_at).toLocaleString()} · {item.status}
+                    {new Date(item.created_at).toLocaleString()}
                   </p>
                 </div>
-                <select
-                  className="form-input max-w-[180px]"
-                  value={item.status}
-                  onChange={(e) =>
-                    void setStatus(
-                      item.id,
-                      e.target.value as WashBookingRow["status"]
-                    )
-                  }
-                >
-                  {statuses.map((status) => (
-                    <option key={status} value={status}>
-                      {status}
-                    </option>
-                  ))}
-                </select>
+                <div className="w-full min-w-[168px] max-w-[200px] shrink-0">
+                  <label
+                    htmlFor={`booking-status-${item.id}`}
+                    className="form-label !mb-2 font-mono text-[10px] tracking-[0.12em] text-kyra-steel uppercase"
+                  >
+                    Status
+                  </label>
+                  <Select
+                    id={`booking-status-${item.id}`}
+                    value={item.status}
+                    options={statusOptions}
+                    onChange={(status) =>
+                      void setStatus(item.id, status as WashBookingRow["status"])
+                    }
+                    size="sm"
+                    aria-label={`Booking status for ${item.name}`}
+                  />
+                </div>
               </div>
               {item.notes && (
                 <p className="mt-4 whitespace-pre-wrap text-sm text-muted-foreground">

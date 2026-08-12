@@ -40,23 +40,23 @@ export function WrapPopover({
       initial={{ opacity: 0, y: 16, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 16, scale: 0.96 }}
-      className="absolute bottom-full left-1/2 mb-4 w-[min(92vw,34rem)] -translate-x-1/2 border border-border bg-muted/95 p-3 shadow-2xl backdrop-blur-xl sm:p-4"
+      className="absolute bottom-full left-1/2 mb-4 w-[min(92vw,34rem)] -translate-x-1/2 border border-white/12 bg-[#121214]/92 p-3 text-white shadow-2xl backdrop-blur-xl sm:p-4"
     >
       <div className="mb-3 flex items-center justify-between">
-        <p className="font-mono text-[10px] tracking-[0.12em] text-kyra-steel uppercase">
+        <p className="font-mono text-[10px] tracking-[0.12em] text-white/55 uppercase">
           Wrap Colour
         </p>
         <button
           type="button"
           onClick={onClose}
-          className="text-kyra-steel transition hover:text-foreground"
+          className="text-white/55 transition hover:text-white"
           aria-label="Close"
         >
           <X size={16} />
         </button>
       </div>
 
-      <div className="relative flex max-w-sm border border-border bg-background p-1">
+      <div className="relative flex max-w-sm border border-white/12 bg-black/40 p-1">
         {wrapFinishes.map((item) => (
           <button
             key={item.id}
@@ -64,7 +64,7 @@ export function WrapPopover({
             onClick={() => onFinishChange(item.id)}
             className={cn(
               "relative z-10 flex-1 px-3 py-1.5 font-mono text-[10px] tracking-[0.06em] uppercase transition-colors",
-              finish === item.id ? "text-white" : "text-kyra-steel"
+              finish === item.id ? "text-white" : "text-white/55"
             )}
           >
             {finish === item.id && (
@@ -89,7 +89,7 @@ export function WrapPopover({
               "shrink-0 border px-3 py-1 font-mono text-[10px] tracking-[0.06em] uppercase transition sm:text-xs",
               category === item.id
                 ? "border-kyra-red bg-kyra-red text-white"
-                : "border-border text-kyra-steel hover:border-kyra-red hover:text-foreground"
+                : "border-white/15 text-white/55 hover:border-kyra-red hover:text-white"
             )}
           >
             {item.label}
@@ -141,7 +141,7 @@ export function WrapPopover({
         </div>
       </div>
 
-      <p className="mt-3 text-center font-mono text-[10px] text-kyra-steel">
+      <p className="mt-3 text-center font-mono text-[10px] text-white/55">
         {filteredWraps.find((w) => w.id === wrapId)?.name ?? "Select a colour"}
       </p>
     </motion.div>
