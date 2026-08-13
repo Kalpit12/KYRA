@@ -9,7 +9,7 @@ const CTA_BACKGROUND = "/BMW%27s.jpg";
 
 export function ContactCtaSection() {
   return (
-    <section className="relative overflow-hidden border-t border-border py-24 md:py-32">
+    <section className="home-section-cv relative overflow-hidden border-t border-border py-24 md:py-32">
       <Image
         src={CTA_BACKGROUND}
         alt=""

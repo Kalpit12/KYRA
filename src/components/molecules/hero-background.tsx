@@ -5,7 +5,6 @@ import {
   Component,
   useEffect,
   useState,
-  type ErrorInfo,
   type ReactNode,
 } from "react";
 

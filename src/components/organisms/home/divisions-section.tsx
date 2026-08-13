@@ -9,7 +9,7 @@ import { divisions } from "@/lib/data/home";
 
 export function DivisionsSection() {
   return (
-    <section className="section-padding relative border-t border-border bg-muted">
+    <section className="home-section-cv section-padding relative border-t border-border bg-muted">
       <div className="container-kyra">
         <SectionHeading
           label="Our Companies"

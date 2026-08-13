@@ -6,7 +6,7 @@ import type { Vehicle } from "@/types";
 
 export function LatestVehiclesSection({ vehicles }: { vehicles: Vehicle[] }) {
   return (
-    <section className="section-padding border-t border-border bg-muted">
+    <section className="home-section-cv section-padding border-t border-border bg-muted">
       <div className="container-kyra">
         <SectionHeading
           label="New Arrivals"

@@ -17,7 +17,7 @@ const divisionLinks = [
 
 export function AllInOneSection() {
   return (
-    <section className="relative overflow-hidden border-y border-border bg-background">
+    <section className="home-section-cv relative overflow-hidden border-y border-border bg-background">
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 
       <div className="relative min-h-[72vh] lg:min-h-[85vh]">

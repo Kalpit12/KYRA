@@ -17,8 +17,8 @@ type LazyVideoProps = Omit<
 };
 
 /**
- * Defers media download until near viewport. Uses preload=metadata only after
- * the element is observed; prefers poster first for LCP.
+ * Defers media download until near viewport. Pauses decode when off-screen
+ * so scrolling past looping heroes does not keep burning GPU/CPU.
  */
 export function LazyVideo({
   src,
@@ -34,7 +34,8 @@ export function LazyVideo({
   ...rest
 }: LazyVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [active, setActive] = useState(false);
+  const [armed, setArmed] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
@@ -51,10 +52,9 @@ export function LazyVideo({
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) {
-          setActive(true);
-          io.disconnect();
-        }
+        const onScreen = Boolean(entry?.isIntersecting);
+        setVisible(onScreen);
+        if (onScreen) setArmed(true);
       },
       { rootMargin, threshold: 0.01 }
     );
@@ -64,9 +64,16 @@ export function LazyVideo({
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !active || reducedMotion || !autoPlayWhenVisible) return;
-    video.play().catch(() => {});
-  }, [active, reducedMotion, autoPlayWhenVisible]);
+    if (!video || !armed || reducedMotion || !autoPlayWhenVisible) return;
+
+    if (visible) {
+      video.play().catch(() => {});
+    } else {
+      video.pause();
+    }
+  }, [armed, visible, reducedMotion, autoPlayWhenVisible]);
+
+  const playing = armed && visible && autoPlayWhenVisible && !reducedMotion;
 
   return (
     <video
@@ -74,14 +81,14 @@ export function LazyVideo({
       muted={muted}
       loop={loop}
       playsInline={playsInline}
-      preload={active && !reducedMotion ? "metadata" : "none"}
+      preload={armed && !reducedMotion ? "metadata" : "none"}
       poster={poster}
-      autoPlay={active && autoPlayWhenVisible && !reducedMotion}
+      autoPlay={playing}
       onError={onError}
       className={cn(className)}
       {...rest}
     >
-      {active && !reducedMotion ? (
+      {armed && !reducedMotion ? (
         children ?? <source src={src} type="video/mp4" />
       ) : null}
     </video>

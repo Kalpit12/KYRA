@@ -7,7 +7,7 @@ import { testimonials } from "@/lib/data/home";
 
 export function TestimonialsSection() {
   return (
-    <section className="section-padding border-t border-border bg-background">
+    <section className="home-section-cv section-padding border-t border-border bg-background">
       <div className="container-kyra">
         <SectionHeading
           label="Testimonials"

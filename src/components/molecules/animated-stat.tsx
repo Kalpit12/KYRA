@@ -33,12 +33,6 @@ export function AnimatedStat({
     let raf = 0;
     const startAt = performance.now() + delay;
 
-    const format = (n: number) => {
-      const rounded = Math.round(n);
-      if (pad) return String(rounded).padStart(pad, "0");
-      return String(rounded);
-    };
-
     const tick = (now: number) => {
       if (now < startAt) {
         raf = requestAnimationFrame(tick);
@@ -58,7 +52,7 @@ export function AnimatedStat({
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [mounted, isInView, value, delay, duration, pad, hasAnimated]);
+  }, [mounted, isInView, value, delay, duration, hasAnimated]);
 
   const formatted =
     pad && mounted ? String(display).padStart(pad, "0") : String(display);
@@ -66,7 +60,7 @@ export function AnimatedStat({
   return (
     <div
       ref={ref}
-      className="min-w-0 bg-muted/80 px-3 py-3 backdrop-blur-sm sm:px-5 sm:py-4"
+      className="min-w-0 bg-muted/80 px-3 py-3 sm:px-5 sm:py-4"
     >
       <span
         className="inline-flex items-baseline whitespace-nowrap font-hero text-[clamp(1.125rem,2.8vw,1.5rem)] font-extrabold leading-none tracking-[-0.03em] text-foreground tabular-nums"

@@ -194,6 +194,12 @@ h4 {
   @apply mx-auto w-full max-w-[1240px];
 }
 
+/* Skip layout/paint work for off-screen homepage bands while scrolling */
+.home-section-cv {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 720px;
+}
+
 .line-accent {
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--kyra-red), transparent);

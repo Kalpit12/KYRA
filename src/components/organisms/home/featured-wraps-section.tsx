@@ -83,9 +83,9 @@ function WrapProjectCard({
           <AnimatePresence mode="sync" initial={false}>
             <motion.div
               key={src}
-              initial={{ opacity: 0, scale: 1 }}
-              animate={{ opacity: 1, scale: 1.04 }}
-              exit={{ opacity: 0, scale: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               transition={{ duration: FADE_MS, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0"
             >
@@ -98,7 +98,7 @@ function WrapProjectCard({
                 priority={active && current === 0}
                 loading={active ? "eager" : "lazy"}
                 fetchPriority={active && current === 0 ? "high" : "auto"}
-                className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                className="object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02]"
               />
             </motion.div>
           </AnimatePresence>
@@ -148,7 +148,9 @@ function WrapProjectCard({
 
 export function FeaturedWrapsSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const inView = useInView(sectionRef, { once: true, margin: "500px 0px" });
+  // Keep observing — pause slideshow when the section leaves the viewport
+  const inView = useInView(sectionRef, { once: false, margin: "200px 0px" });
+  const warmed = useRef(false);
   const slideCount = Math.max(
     ...wrapProjects.map((project) => project.images.length),
     1
@@ -156,7 +158,8 @@ export function FeaturedWrapsSection() {
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || warmed.current) return;
+    warmed.current = true;
     wrapProjects.forEach((project) => {
       const first = project.images[0];
       if (first) prefetchOptimized(first);
@@ -165,7 +168,10 @@ export function FeaturedWrapsSection() {
 
   useEffect(() => {
     if (!inView || slideCount <= 1) return;
+    if (document.hidden) return;
+
     const timer = window.setInterval(() => {
+      if (document.hidden) return;
       setSlide((current) => (current + 1) % slideCount);
     }, SLIDE_MS);
     return () => window.clearInterval(timer);
@@ -174,7 +180,7 @@ export function FeaturedWrapsSection() {
   return (
     <section
       ref={sectionRef}
-      className="section-padding border-t border-border bg-background"
+      className="home-section-cv section-padding border-t border-border bg-background"
     >
       <div className="container-kyra">
         <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">

@@ -41,12 +41,11 @@ const heroTextContainer = {
 };
 
 const heroWord = {
-  hidden: { opacity: 0, y: 36, filter: "blur(10px)" },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.75, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
