@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
 import { finishPresets, hexToThreeColor } from "@/lib/simulator/finish-presets";
 import { getCarbonTextures } from "@/lib/simulator/carbon-texture";
 import {
@@ -205,7 +206,8 @@ export function CarModel({
   enableShadows = true,
   liteMaterials = false,
 }: CarModelProps) {
-  const { scene } = useGLTF(modelPath, true);
+  useGLTF.setDecoderPath(DRACO_DECODER_PATH);
+  const { scene } = useGLTF(modelPath, DRACO_DECODER_PATH);
   const primaryColor = wrap.colors[0];
   const secondaryColor = wrap.colors[1] ?? wrap.colors[0];
 

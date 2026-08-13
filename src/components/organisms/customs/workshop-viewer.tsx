@@ -152,6 +152,7 @@ export function WorkshopViewer({
         ) : (
           <WorkshopErrorBoundary
             key={vehicleTypeId}
+            resetKey={vehicleTypeId}
             fallback={
               <WorkshopModelFallback message="The wrap simulator hit a WebGL error. Try another browser or disable hardware acceleration blockers." />
             }

@@ -18,7 +18,7 @@ export function StudioLights({ preview = false }: { preview?: boolean }) {
       <ambientLight intensity={0.22} />
       <hemisphereLight args={["#ffffff", "#c9c9ce", 0.38]} />
 
-      <Environment frames={1} resolution={128} environmentIntensity={0.78}>
+      <Environment frames={1} resolution={64} environmentIntensity={0.78}>
         <Lightformer
           intensity={1.45}
           rotation-x={Math.PI / 2}
@@ -69,7 +69,7 @@ export function StudioLights({ preview = false }: { preview?: boolean }) {
         position={[3.8, 10, 5]}
         intensity={0.28}
         castShadow
-        shadow-mapSize={[1024, 1024]}
+        shadow-mapSize={[512, 512]}
         shadow-camera-near={1}
         shadow-camera-far={28}
         shadow-camera-left={-8}

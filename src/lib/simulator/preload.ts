@@ -1,8 +1,10 @@
 import { resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
+import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
 import { warmStudioLockupTexture } from "@/lib/simulator/studio-lockup";
 import { vehicleTypes } from "@/lib/data/simulator";
 
 const prefetchedModels = new Set<string>();
+const decodedModels = new Set<string>();
 
 function prefetchGlb(url: string) {
   if (typeof window === "undefined" || prefetchedModels.has(url)) return;
@@ -20,8 +22,12 @@ export function preloadSimulatorModel(modelPath: string) {
   const url = resolveSimulatorModelUrl(modelPath);
   prefetchGlb(url);
 
+  if (decodedModels.has(url)) return;
+  decodedModels.add(url);
+
   void import("@react-three/drei").then(({ useGLTF }) => {
-    useGLTF.preload(url, true);
+    useGLTF.setDecoderPath(DRACO_DECODER_PATH);
+    useGLTF.preload(url, DRACO_DECODER_PATH);
   });
 }
 
@@ -43,7 +49,7 @@ export function warmAllSimulatorModelsIdle() {
 
   const run = () => {
     for (const vehicle of vehicleTypes) {
-      preloadSimulatorModel(vehicle.modelPath);
+      prefetchGlb(resolveSimulatorModelUrl(vehicle.modelPath));
     }
   };
 

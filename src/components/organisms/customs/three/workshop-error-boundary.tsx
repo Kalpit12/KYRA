@@ -5,6 +5,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 interface WorkshopErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
+  resetKey?: string | number;
 }
 
 interface WorkshopErrorBoundaryState {
@@ -40,6 +41,12 @@ export class WorkshopErrorBoundary extends Component<
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error("Workshop 3D preview failed", error, info.componentStack);
+  }
+
+  componentDidUpdate(prevProps: WorkshopErrorBoundaryProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.failed) {
+      this.setState({ failed: false });
+    }
   }
 
   render() {

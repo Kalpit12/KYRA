@@ -7,10 +7,11 @@ import {
   useEffect,
   useRef,
   useMemo,
+  useState,
   type ReactNode,
 } from "react";
 import * as THREE from "three";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { PerspectiveCamera } from "@react-three/drei";
 import { degToRad } from "three/src/math/MathUtils.js";
 import { silenceThreeClockDeprecation } from "@/lib/three/silence-clock-deprecation";
@@ -77,16 +78,43 @@ function extendMaterial(
   });
 }
 
+function ReleaseGpuOnUnmount() {
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    return () => {
+      try {
+        gl.dispose();
+        const lose = gl.getContext().getExtension("WEBGL_lose_context");
+        lose?.loseContext();
+      } catch {
+        // ignore — unmount must never throw
+      }
+    };
+  }, [gl]);
+
+  return null;
+}
+
 function CanvasWrapper({ children }: { children: ReactNode }) {
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setPaused(document.hidden);
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
   return (
     <Canvas
       dpr={1}
-      frameloop="always"
+      frameloop={paused ? "never" : "always"}
       className="beams-container"
       gl={{
         antialias: false,
         alpha: false,
-        powerPreference: "high-performance",
+        powerPreference: "low-power",
         stencil: false,
         depth: true,
         failIfMajorPerformanceCaveat: false,
@@ -94,13 +122,9 @@ function CanvasWrapper({ children }: { children: ReactNode }) {
       }}
       onCreated={({ gl }) => {
         gl.setClearColor(new THREE.Color("#000000"), 1);
-        const canvas = gl.domElement;
-        const onLost = (event: Event) => {
-          event.preventDefault();
-        };
-        canvas.addEventListener("webglcontextlost", onLost, false);
       }}
     >
+      <ReleaseGpuOnUnmount />
       {children}
     </Canvas>
   );

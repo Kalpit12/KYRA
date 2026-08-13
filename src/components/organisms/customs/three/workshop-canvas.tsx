@@ -1,22 +1,25 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import {
   ContactShadows,
   Html,
   OrbitControls,
   PerspectiveCamera,
+  useGLTF,
 } from "@react-three/drei";
 import * as THREE from "three";
 import { CarModel } from "@/components/organisms/customs/three/car-model";
 import { StudioEnvironment } from "@/components/organisms/customs/three/studio-environment";
 import { StudioLights } from "@/components/organisms/customs/three/studio-lights";
 import { silenceThreeClockDeprecation } from "@/lib/three/silence-clock-deprecation";
+import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
 import type { WrapFinishId, WrapOption, WindowFilm } from "@/lib/data/simulator";
 
 silenceThreeClockDeprecation();
+useGLTF.setDecoderPath(DRACO_DECODER_PATH);
 
 export type WorkshopPerformanceMode = "full" | "preview";
 
@@ -38,29 +41,50 @@ function LoadingFallback({ label }: { label: string }) {
   );
 }
 
-export function WorkshopCanvas({
+function ContextLostGuard({ onLost }: { onLost: () => void }) {
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handleLost = () => {
+      onLost();
+    };
+    canvas.addEventListener("webglcontextlost", handleLost, false);
+    return () => {
+      canvas.removeEventListener("webglcontextlost", handleLost, false);
+    };
+  }, [gl, onLost]);
+
+  return null;
+}
+
+function WorkshopScene({
   modelPath,
   modelScale,
   wrap,
   finish,
   tint,
   performanceMode = "full",
-}: WorkshopCanvasProps) {
+  liteMaterials,
+  onContextLost,
+}: WorkshopCanvasProps & { liteMaterials: boolean; onContextLost: () => void }) {
   const isPreview = performanceMode === "preview";
   const [autoRotate, setAutoRotate] = useState(!isPreview);
 
   return (
     <Canvas
       shadows={!isPreview}
-      dpr={isPreview ? 1 : [1, 1.6]}
+      dpr={isPreview ? 1 : [1, 1.25]}
       frameloop="always"
       gl={{
-        antialias: !isPreview,
+        antialias: !isPreview && !liteMaterials,
         alpha: false,
-        powerPreference: "high-performance",
+        powerPreference: "default",
         toneMapping: THREE.ACESFilmicToneMapping,
         stencil: false,
         depth: true,
+        failIfMajorPerformanceCaveat: false,
+        preserveDrawingBuffer: false,
       }}
       onCreated={({ gl }) => {
         gl.toneMappingExposure = isPreview ? 1.06 : 1.04;
@@ -69,6 +93,7 @@ export function WorkshopCanvas({
       }}
       className="h-full w-full"
     >
+      <ContextLostGuard onLost={onContextLost} />
       <color attach="background" args={["#ececee"]} />
 
       <PerspectiveCamera
@@ -91,14 +116,14 @@ export function WorkshopCanvas({
         onStart={() => setAutoRotate(false)}
       />
 
-      <StudioLights preview={isPreview} />
+      <StudioLights preview={isPreview || liteMaterials} />
 
       <Suspense
         fallback={
           <LoadingFallback label={isPreview ? "Loading preview" : "Loading studio"} />
         }
       >
-        <StudioEnvironment receiveShadow={!isPreview} />
+        <StudioEnvironment receiveShadow={!isPreview && !liteMaterials} />
         <group position={[0, 0.07, 0]}>
           <CarModel
             modelPath={modelPath}
@@ -106,11 +131,11 @@ export function WorkshopCanvas({
             wrap={wrap}
             finish={finish}
             tint={tint}
-            enableShadows={!isPreview}
-            liteMaterials={isPreview}
+            enableShadows={!isPreview && !liteMaterials}
+            liteMaterials={isPreview || liteMaterials}
           />
         </group>
-        {!isPreview && (
+        {!isPreview && !liteMaterials && (
           <ContactShadows
             position={[0, 0.07, 0]}
             opacity={0.2}
@@ -118,11 +143,65 @@ export function WorkshopCanvas({
             blur={2.8}
             far={6.5}
             color="#2a2a2e"
-            resolution={512}
+            resolution={256}
             frames={1}
           />
         )}
       </Suspense>
     </Canvas>
+  );
+}
+
+export function WorkshopCanvas(props: WorkshopCanvasProps) {
+  const [epoch, setEpoch] = useState(0);
+  const [liteMaterials, setLiteMaterials] = useState(false);
+  const [gaveUp, setGaveUp] = useState(false);
+  const lostCount = useRef(0);
+
+  const handleContextLost = useCallback(() => {
+    lostCount.current += 1;
+    if (lostCount.current > 2) {
+      setGaveUp(true);
+      return;
+    }
+    setLiteMaterials(true);
+    window.setTimeout(() => setEpoch((current) => current + 1), 280);
+  }, []);
+
+  if (gaveUp) {
+    return (
+      <div className="flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-3 bg-[#ececee] px-6 text-center">
+        <p className="font-mono text-[10px] tracking-[0.16em] text-kyra-red uppercase">
+          Studio preview
+        </p>
+        <p className="font-display text-xl italic uppercase text-foreground">
+          3D model unavailable
+        </p>
+        <p className="max-w-sm text-sm text-foreground/70">
+          This browser lost its WebGL context. Close other GPU-heavy tabs and retry.
+        </p>
+        <button
+          type="button"
+          className="mt-2 border border-border px-4 py-2 font-mono text-[10px] tracking-[0.14em] uppercase text-foreground transition hover:border-kyra-red"
+          onClick={() => {
+            lostCount.current = 0;
+            setGaveUp(false);
+            setLiteMaterials(true);
+            setEpoch((current) => current + 1);
+          }}
+        >
+          Retry studio
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <WorkshopScene
+      key={epoch}
+      {...props}
+      liteMaterials={liteMaterials}
+      onContextLost={handleContextLost}
+    />
   );
 }
