@@ -9,8 +9,7 @@ export const aboutIntro = {
     "Experience a superior selection of meticulously sourced and high-quality cars, curated to elevate your driving experience.",
   ],
   pullQuote: "Meticulously sourced. Performance-grade. Curated for you.",
-  image:
-    "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1200&q=80",
+  image: "/instagram/DZCTN25CAGy.jpg",
   imageAlt: "KYRA Platinum Imports showroom — Spring Valley, Nairobi",
 };
 

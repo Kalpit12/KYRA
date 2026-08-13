@@ -48,6 +48,13 @@ export const BUDGET_OVER_12M = "Over KES 12M";
 /** Legacy URL value from older chips */
 export const BUDGET_OVER_10M_LEGACY = "Over KES 10M";
 
+export type InventorySort =
+  | "newest"
+  | "price-asc"
+  | "price-desc"
+  | "year-desc"
+  | "mileage-asc";
+
 export interface InventoryQuery {
   search?: string;
   /** Active body-type chip */
@@ -63,6 +70,48 @@ export interface InventoryQuery {
    * "Under KES 8M" | "KES 8M – 12M" | "Over KES 12M"
    */
   budget?: string;
+  /** Sort key for inventory results */
+  sort?: InventorySort;
+}
+
+export const inventorySortOptions: { value: InventorySort; label: string }[] = [
+  { value: "newest", label: "Newest" },
+  { value: "price-asc", label: "Price ↑" },
+  { value: "price-desc", label: "Price ↓" },
+  { value: "year-desc", label: "Year ↓" },
+  { value: "mileage-asc", label: "Mileage ↑" },
+];
+
+export function normalizeSort(sort?: string | null): InventorySort {
+  if (
+    sort === "price-asc" ||
+    sort === "price-desc" ||
+    sort === "year-desc" ||
+    sort === "mileage-asc"
+  ) {
+    return sort;
+  }
+  return "newest";
+}
+
+export function sortVehicles(
+  vehicles: Vehicle[],
+  sort: InventorySort = "newest"
+): Vehicle[] {
+  const list = [...vehicles];
+  switch (sort) {
+    case "price-asc":
+      return list.sort((a, b) => a.price - b.price);
+    case "price-desc":
+      return list.sort((a, b) => b.price - a.price);
+    case "year-desc":
+      return list.sort((a, b) => b.year - a.year || a.mileage - b.mileage);
+    case "mileage-asc":
+      return list.sort((a, b) => a.mileage - b.mileage);
+    case "newest":
+    default:
+      return list;
+  }
 }
 
 /** Makes shown in hero search + makes strip. */
@@ -73,6 +122,7 @@ export const INVENTORY_MAKES = [
   "Audi",
   "Toyota",
   "Porsche",
+  "Nissan",
 ] as const;
 
 /** Normalize display brands (e.g. Range Rover → Land Rover). */
@@ -90,6 +140,7 @@ export function normalizeBrand(brand: string): string {
   if (lower === "audi") return "Audi";
   if (lower === "toyota") return "Toyota";
   if (lower === "porsche") return "Porsche";
+  if (lower === "nissan") return "Nissan";
 
   // Preserve canonical casing when we already know the brand
   const known = INVENTORY_MAKES.find((m) => m.toLowerCase() === lower);
@@ -225,10 +276,12 @@ export function buildInventoryQueryString(query: {
   fuel?: string;
   maxPrice?: string;
   budget?: string;
+  sort?: InventorySort | string;
 }): string {
   const params = new URLSearchParams();
   const brand = normalizeBrand(query.brand ?? "");
   const budget = normalizeBudget(query.budget ?? "");
+  const sort = normalizeSort(query.sort);
 
   if (brand) params.set("make", brand);
 
@@ -250,6 +303,7 @@ export function buildInventoryQueryString(query: {
   if (query.transmission) params.set("transmission", query.transmission);
   if (query.fuel) params.set("fuel", query.fuel);
   if (query.maxPrice) params.set("maxPrice", query.maxPrice);
+  if (sort !== "newest") params.set("sort", sort);
 
   return params.toString();
 }

@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
-import { formatPrice, formatWhatsAppLink } from "@/lib/utils";
-import { Button } from "@/components/atoms/button";
+import { formatPrice } from "@/lib/utils";
 import { Eyebrow } from "@/components/atoms/eyebrow";
 import { VehicleCard } from "@/components/molecules/vehicle-card";
 import { SectionHeading } from "@/components/molecules/section-heading";
 import { TradeBand } from "@/components/molecules/trade-band";
-import { MessageCircle, Calendar } from "lucide-react";
+import { VehicleGallery } from "@/components/organisms/imports/vehicle-gallery";
+import { VehicleInquiryBar } from "@/components/organisms/imports/vehicle-inquiry-bar";
 import { getVehicleBySlug, getVehicles } from "@/lib/admin/vehicles";
 
 interface PageProps {
@@ -51,10 +50,10 @@ export default async function VehicleDetailPage({ params }: PageProps) {
     .filter((v) => v.slug !== slug && v.brand === vehicle.brand)
     .slice(0, 3);
 
-  const whatsappLink = formatWhatsAppLink(
-    "254724809009",
-    `Hi KYRA, I'm interested in the ${vehicle.brand} ${vehicle.model} (${vehicle.year}).`
-  );
+  const galleryImages =
+    vehicle.images?.length > 0
+      ? Array.from(new Set([vehicle.image, ...vehicle.images].filter(Boolean)))
+      : [vehicle.image].filter(Boolean);
 
   const overviewSpecs = [
     { label: "Year", value: String(vehicle.year) },
@@ -110,24 +109,12 @@ export default async function VehicleDetailPage({ params }: PageProps) {
       <section className="pt-24 pb-12 md:pt-[110px] md:pb-16">
         <div className="container-kyra px-6 md:px-12 lg:px-20">
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-12">
-            <div className="relative">
-              <Image
-                src={vehicle.image}
-                alt={`${vehicle.brand} ${vehicle.model}`}
-                width={640}
-                height={400}
-                className="photo-angular h-auto w-full border border-border object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-              />
-              <div
-                className="absolute -top-2.5 -right-2.5 h-14 w-14 bg-kyra-red"
-                style={{ clipPath: "polygon(100% 0, 0 0, 100% 100%)" }}
-                aria-hidden
-              />
-            </div>
+            <VehicleGallery
+              images={galleryImages}
+              alt={`${vehicle.brand} ${vehicle.model}`}
+            />
 
-            <div className="flex flex-col justify-center">
+            <div className="flex flex-col justify-center pb-24 md:pb-0">
               <Eyebrow>{vehicle.brand}</Eyebrow>
               <h1 className="font-hero mt-3 text-[clamp(2rem,4vw,3rem)] leading-[0.98] text-foreground">
                 {vehicle.model}
@@ -161,16 +148,13 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 </p>
               )}
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-                <Button href={whatsappLink} variant="primary" size="lg" magnetic className="w-full sm:w-auto">
-                  <MessageCircle size={18} />
-                  WhatsApp Inquiry
-                </Button>
-                <Button href="/contact" variant="secondary" size="lg" className="w-full sm:w-auto">
-                  <Calendar size={18} />
-                  Reserve Vehicle
-                </Button>
-              </div>
+              <VehicleInquiryBar
+                brand={vehicle.brand}
+                model={vehicle.model}
+                year={vehicle.year}
+                price={vehicle.price}
+                className="mt-8"
+              />
             </div>
           </div>
 

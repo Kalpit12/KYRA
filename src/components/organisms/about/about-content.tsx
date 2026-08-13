@@ -32,7 +32,7 @@ export function AboutContent() {
         title="About KYRA"
         subtitle="Kenya's most premium automotive lifestyle brand — headquartered in Spring Valley, Nairobi. Import, customize, and maintain under one roof."
         showChevrons
-        backgroundImage="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1920&q=80"
+        backgroundImage="/BMW%27s.jpg"
       />
 
       <section className="section-padding border-b border-border bg-background">

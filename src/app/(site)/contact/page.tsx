@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Mail, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/atoms/button";
@@ -51,6 +52,36 @@ const contactDetails = [
 ] as const;
 
 export default function ContactPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="section-padding bg-background">
+          <div className="container-kyra py-24 text-center font-mono text-xs tracking-[0.12em] text-kyra-steel uppercase">
+            Loading…
+          </div>
+        </div>
+      }
+    >
+      <ContactPageContent />
+    </Suspense>
+  );
+}
+
+function ContactPageContent() {
+  const searchParams = useSearchParams();
+  const vehiclePrefill = searchParams.get("vehicle")?.trim() ?? "";
+  const interest = searchParams.get("interest")?.trim() ?? "";
+
+  const defaultMessage = useMemo(() => {
+    if (interest === "viewing" && vehiclePrefill) {
+      return `I'd like to book a private viewing for the ${vehiclePrefill}.`;
+    }
+    if (vehiclePrefill) {
+      return `I'm interested in the ${vehiclePrefill}.`;
+    }
+    return "";
+  }, [interest, vehiclePrefill]);
+
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +89,7 @@ export default function ContactPage() {
     name: "",
     email: "",
     phone: "",
-    message: "",
+    message: defaultMessage,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +126,7 @@ export default function ContactPage() {
         eyebrow="Get in Touch"
         title="Contact KYRA"
         subtitle="Private viewings, import inquiries, and wrap consultations — by appointment."
-        backgroundImage="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1920&q=80"
+        backgroundImage="/instagram/DZ7UoDaNWHm.jpg"
         showChevrons
         showShard
       />

@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
+import { Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/atoms/button";
 import { KyraBrand, KyraCustomsBrand, KyraWashBrand } from "@/components/atoms/kyra-logo";
+import { kyraContact } from "@/lib/data/contact";
 
 import { useMounted } from "@/lib/hooks/use-mounted";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
@@ -97,8 +98,8 @@ export function Navbar() {
             )}
           </div>
 
-          <div className="ml-auto hidden items-center gap-8 lg:flex xl:gap-10">
-            <nav className="flex shrink-0 items-center gap-6 xl:gap-8">
+          <div className="ml-auto hidden items-center gap-6 lg:flex xl:gap-8">
+            <nav className="flex shrink-0 items-center gap-5 xl:gap-7">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
@@ -114,6 +115,19 @@ export function Navbar() {
                 </Link>
               ))}
             </nav>
+
+            <a
+              href={kyraContact.phoneHref}
+              className={cn(
+                "nav-link-theme hidden items-center gap-2 whitespace-nowrap font-mono text-[11px] tracking-[0.08em] uppercase transition-colors xl:inline-flex",
+                lightOverHero
+                  ? "text-white/70 hover:text-white"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Phone size={14} className="text-kyra-red" aria-hidden />
+              {kyraContact.phone}
+            </a>
 
             <Button href="/contact" variant="primary" size="sm">
               Book a Viewing
@@ -184,6 +198,16 @@ export function Navbar() {
                   </Link>
                 </motion.div>
               ))}
+              <Button
+                href={kyraContact.phoneHref}
+                variant="secondary"
+                size="lg"
+                showArrow={false}
+                onClick={() => setIsMobileOpen(false)}
+              >
+                <Phone size={18} />
+                {kyraContact.phone}
+              </Button>
               <Button
                 href="/contact"
                 variant="primary"

@@ -19,10 +19,14 @@ import {
   BUDGET_MID,
   buildInventoryQueryString,
   filterVehicles,
+  inventorySortOptions,
   normalizeBrand,
   normalizeBudget,
+  normalizeSort,
   parseInventoryParams,
+  sortVehicles,
   type BodyTypeFilter,
+  type InventorySort,
 } from "@/lib/inventory-filters";
 
 interface ImportsContentProps {
@@ -42,6 +46,7 @@ function stateFromParams(params: URLSearchParams) {
     transmission: params.get("transmission") ?? "",
     fuel: params.get("fuel") ?? "",
     maxPrice: params.get("maxPrice") ?? "",
+    sort: normalizeSort(params.get("sort")),
   };
 }
 
@@ -102,7 +107,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
   }, [filters, pathname, router]);
 
   const filtered = useMemo(
-    () => filterVehicles(vehicles, filters),
+    () => sortVehicles(filterVehicles(vehicles, filters), filters.sort),
     [filters, vehicles]
   );
 
@@ -113,7 +118,8 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
     Boolean(filters.transmission) ||
     Boolean(filters.fuel) ||
     Boolean(filters.maxPrice) ||
-    Boolean(filters.budget);
+    Boolean(filters.budget) ||
+    filters.sort !== "newest";
 
   const clearFilters = useCallback(() => {
     lastWrittenQuery.current = "";
@@ -125,6 +131,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
       transmission: "",
       fuel: "",
       maxPrice: "",
+      sort: "newest" as InventorySort,
     });
     router.replace(pathname, { scroll: false });
   }, [pathname, router]);
@@ -156,7 +163,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
         title="Find your next drive."
         subtitle="Curated luxury vehicles, hand-selected and imported with full documentation and a complete import dossier."
         showChevrons
-        backgroundImage="https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=1920&q=80"
+        backgroundImage="/instagram/DZCTN25CAGy.jpg"
       />
 
       <MakesStrip activeMake={filters.brand} onSelect={handleMakeSelect} />
@@ -311,9 +318,29 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
             </div>
           )}
 
-          <p className="mt-8 font-mono text-xs tracking-[0.06em] text-kyra-steel uppercase">
-            {filtered.length} vehicle{filtered.length !== 1 ? "s" : ""} found
-          </p>
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-mono text-xs tracking-[0.06em] text-kyra-steel uppercase">
+              {filtered.length} vehicle{filtered.length !== 1 ? "s" : ""} found
+            </p>
+            <div className="flex items-center gap-3">
+              <span className="form-label !mb-0 shrink-0">Sort</span>
+              <Select
+                id="filter-sort"
+                value={filters.sort}
+                options={inventorySortOptions.map((option) => ({
+                  value: option.value,
+                  label: option.label,
+                }))}
+                onChange={(value) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    sort: normalizeSort(value),
+                  }))
+                }
+                aria-label="Sort vehicles"
+              />
+            </div>
+          </div>
 
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {filtered.map((vehicle, index) => (

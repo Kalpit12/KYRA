@@ -75,7 +75,9 @@ export function Button({
 
   const content = (
     <>
-      <span className="relative z-10">{children}</span>
+      <span className="relative z-10 inline-flex items-center gap-2 whitespace-nowrap">
+        {children}
+      </span>
       {withArrow && (
         <span
           className="relative z-10 font-mono text-[11px] leading-none opacity-80 transition-transform duration-200 group-hover:translate-x-1"

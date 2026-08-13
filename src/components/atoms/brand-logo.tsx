@@ -7,7 +7,8 @@ export type BrandLogoId =
   | "Land Rover"
   | "Audi"
   | "Toyota"
-  | "Porsche";
+  | "Porsche"
+  | "Nissan";
 
 const BRAND_ASSETS: Record<
   BrandLogoId,
@@ -27,6 +28,7 @@ const BRAND_ASSETS: Record<
     width: 220,
     height: 100,
   },
+  Nissan: { src: "/brands/nissan.png?v=1", width: 240, height: 140 },
 };
 
 interface BrandLogoProps {

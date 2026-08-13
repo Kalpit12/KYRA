@@ -14,8 +14,7 @@ import { useMounted } from "@/lib/hooks/use-mounted";
 
 const HERO_VIDEO = "/video/m340i-b-roll.mp4";
 const HERO_VIDEO_POSTER = "/video/posters/m340i-b-roll.jpg";
-const HERO_VIDEO_FALLBACK =
-  "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=1200&q=80";
+const HERO_VIDEO_FALLBACK = "/video/posters/m340i-b-roll.jpg";
 
 const divisions = ["Import", "Customize", "Maintain"];
 
@@ -131,7 +130,7 @@ export function HeroSection() {
       data-nav-theme="dark"
       className="relative flex min-h-0 items-center overflow-hidden bg-black pt-24 pb-12 md:min-h-screen md:pt-[110px] md:pb-20"
     >
-      <HeroBackground enableBeams={false} />
+      <HeroBackground />
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 
       <div className="container-kyra relative z-10 px-6 md:px-12 lg:px-20">

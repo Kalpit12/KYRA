@@ -9,7 +9,7 @@ export function WhyKyraSection() {
     <section className="home-section-cv border-y border-border bg-muted">
       <div className="container-kyra px-6 py-16 md:px-12 md:py-24 lg:px-20 lg:py-28">
         <SectionHeading
-          label="Brand Equity"
+          label="Why Choose KYRA"
           title="Trusted, aspirational, and built for buyers who do their homework."
           subtitle="We don't sell cars. We curate automotive experiences for those who demand the extraordinary."
           align="center"

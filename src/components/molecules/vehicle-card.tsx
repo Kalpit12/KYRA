@@ -25,13 +25,23 @@ const statusStyles: Record<Vehicle["status"], string> = {
   sold: "border-border bg-muted text-muted-foreground",
 };
 
+function formatBodyType(bodyType?: Vehicle["bodyType"]) {
+  if (!bodyType) return null;
+  return bodyType.replace(/^\w/, (c) => c.toUpperCase());
+}
+
 export function VehicleCard({ vehicle, index = 0 }: VehicleCardProps) {
+  const bodyLabel = formatBodyType(vehicle.bodyType);
   const specs = [
     { label: "Year", value: String(vehicle.year) },
     { label: "Transmission", value: vehicle.transmission },
     { label: "Fuel", value: vehicle.fuel },
     { label: "Mileage", value: `${vehicle.mileage.toLocaleString()} km` },
-  ];
+    bodyLabel ? { label: "Body", value: bodyLabel } : null,
+    vehicle.exteriorColor
+      ? { label: "Color", value: vehicle.exteriorColor }
+      : null,
+  ].filter(Boolean) as { label: string; value: string }[];
 
   return (
     <motion.article
@@ -75,6 +85,11 @@ export function VehicleCard({ vehicle, index = 0 }: VehicleCardProps) {
               />
               {statusLabels[vehicle.status]}
             </div>
+            {vehicle.stockNumber && (
+              <span className="absolute top-3 right-3 z-10 border border-white/30 bg-black/55 px-2 py-1 font-mono text-[9px] tracking-[0.12em] text-white uppercase">
+                {vehicle.stockNumber}
+              </span>
+            )}
           </div>
 
           <div className="p-5">
@@ -83,6 +98,11 @@ export function VehicleCard({ vehicle, index = 0 }: VehicleCardProps) {
             </span>
             <h3 className="font-display text-lg font-semibold italic uppercase text-foreground">
               {vehicle.model}
+              {vehicle.trim ? (
+                <span className="mt-0.5 block text-sm font-medium normal-case not-italic text-kyra-steel">
+                  {vehicle.trim}
+                </span>
+              ) : null}
             </h3>
 
             <div className="mt-4 space-y-2">

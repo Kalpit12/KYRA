@@ -175,30 +175,24 @@ export const washResults: WashResult[] = [
     title: "Paint decontamination",
     vehicle: "Mercedes-AMG G63",
     package: "Platinum",
-    beforeImage:
-      "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80",
-    afterImage:
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80",
+    beforeImage: "/customs/gallery/g350d-03.jpg",
+    afterImage: "/customs/gallery/g350d-01.jpg",
   },
   {
     id: "m4-premium",
     title: "Interior & exterior detail",
     vehicle: "BMW M4 Competition",
     package: "Premium",
-    beforeImage:
-      "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800&q=80",
-    afterImage:
-      "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80",
+    beforeImage: "/customs/gallery/c63s-02.jpg",
+    afterImage: "/customs/gallery/c63s-01.jpg",
   },
   {
     id: "range-essential",
     title: "Exterior refresh",
     vehicle: "Range Rover Sport",
     package: "Essential",
-    beforeImage:
-      "https://images.unsplash.com/photo-1542362567-b07e54358753?w=800&q=80",
-    afterImage:
-      "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80",
+    beforeImage: "/customs/gallery/mist-blue-02.jpg",
+    afterImage: "/customs/gallery/mist-blue-01.jpg",
   },
 ];
 
@@ -211,7 +205,7 @@ export interface WashStudioShot {
 export const washStudioShots: WashStudioShot[] = [
   {
     id: "bay",
-    src: "https://images.unsplash.com/photo-1520340356584-f9917d1eea6f?w=1200&q=80",
+    src: "/video/posters/car-wash-hero.jpg",
     caption: "KYRA Wash bay",
   },
   {
@@ -221,7 +215,7 @@ export const washStudioShots: WashStudioShot[] = [
   },
   {
     id: "wheels",
-    src: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=1200&q=80",
+    src: "/customs/gallery/crown-rs-01.jpg",
     caption: "Wheel & paint care",
   },
 ];
