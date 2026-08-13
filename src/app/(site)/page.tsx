@@ -9,6 +9,7 @@ import { LatestVehiclesSection } from "@/components/organisms/home/latest-vehicl
 import { TestimonialsSection } from "@/components/organisms/home/testimonials-section";
 import { TradeBand } from "@/components/molecules/trade-band";
 import { ContactCtaSection } from "@/components/organisms/home/contact-cta-section";
+import { SiteJsonLd } from "@/components/atoms/site-json-ld";
 import { getFeaturedVehicles, getVehicles } from "@/lib/admin/vehicles";
 
 export const revalidate = 60;
@@ -21,6 +22,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <SiteJsonLd />
       <HeroSection />
       <MakesStrip centered />
       <FeaturedVehiclesSection vehicles={featured} />

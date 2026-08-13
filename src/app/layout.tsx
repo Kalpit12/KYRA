@@ -5,6 +5,7 @@ import {
   Plus_Jakarta_Sans,
   IBM_Plex_Mono,
 } from "next/font/google";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -37,6 +38,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "KYRA | Premium Automotive Experiences",
     template: "%s | KYRA",
@@ -50,12 +52,16 @@ export const metadata: Metadata = {
     "premium car wash Kenya",
     "KYRA",
   ],
+  alternates: {
+    canonical: "./",
+  },
   openGraph: {
     title: "KYRA | Premium Automotive Experiences",
     description: "Import. Customize. Maintain.",
     type: "website",
     locale: "en_KE",
     siteName: "KYRA",
+    url: SITE_URL,
   },
   twitter: {
     card: "summary_large_image",
