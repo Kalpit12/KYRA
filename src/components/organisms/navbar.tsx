@@ -23,18 +23,14 @@ const navLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function Navbar({
-  initialNavOverHero = false,
-}: {
-  initialNavOverHero?: boolean;
-}) {
+export function Navbar() {
   const mounted = useMounted();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "";
-  const lightOverHero =
-    !isScrolled && (isHome || (!mounted && initialNavOverHero));
+  // Client path for class toggles; SSR contrast uses CSS :has(section[data-nav-theme=dark])
+  const lightOverHero = isHome && !isScrolled;
   const isCustoms = pathname === "/customs" || pathname.startsWith("/customs/");
   const isWash = pathname === "/wash" || pathname.startsWith("/wash/");
 
@@ -79,9 +75,8 @@ export function Navbar({
         }}
         className={cn(
           "fixed top-0 right-0 left-0 z-50 transition-all duration-300",
-          lightOverHero && "nav-over-hero",
           isScrolled
-            ? "border-b border-border bg-background py-3"
+            ? "nav-scrolled border-b border-border bg-background py-3"
             : "bg-transparent py-5"
         )}
       >
@@ -109,7 +104,7 @@ export function Navbar({
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "relative whitespace-nowrap pb-1 text-[13px] font-semibold tracking-[0.05em] uppercase transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-kyra-red after:transition-all hover:after:w-full",
+                    "nav-link-theme relative whitespace-nowrap pb-1 text-[13px] font-semibold tracking-[0.05em] uppercase transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-kyra-red after:transition-all hover:after:w-full",
                     lightOverHero
                       ? "text-white/70 hover:text-white"
                       : "text-muted-foreground hover:text-foreground"
@@ -137,19 +132,19 @@ export function Navbar({
               <>
                 <span
                   className={cn(
-                    "block h-0.5 w-6",
+                    "nav-burger-bar block h-0.5 w-6",
                     lightOverHero ? "bg-white" : "bg-foreground"
                   )}
                 />
                 <span
                   className={cn(
-                    "block h-0.5 w-6",
+                    "nav-burger-bar block h-0.5 w-6",
                     lightOverHero ? "bg-white" : "bg-foreground"
                   )}
                 />
                 <span
                   className={cn(
-                    "block h-0.5 w-6",
+                    "nav-burger-bar block h-0.5 w-6",
                     lightOverHero ? "bg-white" : "bg-foreground"
                   )}
                 />

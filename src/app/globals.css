@@ -530,7 +530,38 @@ h4 {
   }
 }
 
-/* Transparent header over dark homepage hero */
+/* Transparent header over dark homepage hero — works on SSR without
+   forcing the whole site dynamic (no headers() / middleware pathname). */
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .kyra-brand-wordmark-main {
+  color: #ffffff;
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .kyra-brand-tagline {
+  color: rgb(255 255 255 / 0.55);
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .kyra-brand-logo-wrap {
+  background: rgb(0 0 0 / 0.7);
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .kyra-brand-logo-wrap img {
+  mix-blend-mode: normal;
+  filter: brightness(1.08) contrast(1.05);
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .nav-link-theme {
+  color: rgb(255 255 255 / 0.7);
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .nav-link-theme:hover {
+  color: #ffffff;
+}
+
+body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .nav-burger-bar {
+  background-color: #ffffff;
+}
+
+/* Legacy class kept for any remaining nav-over-hero usage */
 .nav-over-hero .kyra-brand-wordmark-main {
   color: #ffffff;
 }

@@ -1,8 +1,12 @@
 import type { MetadataRoute } from "next";
 import { getVehicles } from "@/lib/admin/vehicles";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://kyra-alpha.vercel.app";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://kyra.co.ke";
+  const baseUrl = SITE_URL;
   const vehicles = await getVehicles();
 
   const vehicleUrls = vehicles.map((v) => ({

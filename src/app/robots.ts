@@ -1,5 +1,9 @@
 import type { MetadataRoute } from "next";
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+  "https://kyra-alpha.vercel.app";
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -7,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/"],
     },
-    sitemap: "https://kyra.co.ke/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }
