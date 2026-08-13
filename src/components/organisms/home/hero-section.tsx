@@ -127,7 +127,10 @@ export function HeroSection() {
   const mounted = useMounted();
 
   return (
-    <section className="relative flex min-h-0 items-center overflow-hidden bg-black pt-24 pb-12 md:min-h-screen md:pt-[110px] md:pb-20">
+    <section
+      data-nav-theme="dark"
+      className="relative flex min-h-0 items-center overflow-hidden bg-black pt-24 pb-12 md:min-h-screen md:pt-[110px] md:pb-20"
+    >
       <HeroBackground enableBeams={false} />
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 

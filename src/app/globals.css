@@ -530,4 +530,17 @@ h4 {
   }
 }
 
+/* Transparent header over dark homepage hero */
+.nav-over-hero .kyra-brand-wordmark-main {
+  color: #ffffff;
+}
+
+.nav-over-hero .kyra-brand-tagline {
+  color: rgb(255 255 255 / 0.55);
+}
+
+.nav-over-hero .kyra-brand-logo-wrap {
+  background: rgb(0 0 0 / 0.7);
+}
+
 

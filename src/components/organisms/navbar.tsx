@@ -23,12 +23,18 @@ const navLinks = [
   { label: "Contact", href: "/contact" },
 ];
 
-export function Navbar() {
+export function Navbar({
+  initialNavOverHero = false,
+}: {
+  initialNavOverHero?: boolean;
+}) {
   const mounted = useMounted();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const lightOverHero = pathname === "/" && !isScrolled;
+  const isHome = pathname === "/" || pathname === "";
+  const lightOverHero =
+    !isScrolled && (isHome || (!mounted && initialNavOverHero));
   const isCustoms = pathname === "/customs" || pathname.startsWith("/customs/");
   const isWash = pathname === "/wash" || pathname.startsWith("/wash/");
 
@@ -73,6 +79,7 @@ export function Navbar() {
         }}
         className={cn(
           "fixed top-0 right-0 left-0 z-50 transition-all duration-300",
+          lightOverHero && "nav-over-hero",
           isScrolled
             ? "border-b border-border bg-background py-3"
             : "bg-transparent py-5"

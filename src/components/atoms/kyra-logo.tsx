@@ -9,6 +9,8 @@ interface KyraLogoProps {
   priority?: boolean;
   /** Blends out the light JPG background on dark surfaces */
   removeBackground?: boolean;
+  /** Dark pill behind mark on transparent headers */
+  inverted?: boolean;
 }
 
 interface KyraWordmarkProps {
@@ -57,7 +59,7 @@ export function KyraWordmark({
     <span className={cn("inline-flex flex-col whitespace-nowrap", className)}>
       <span
         className={cn(
-          "font-hero font-extrabold tracking-[-0.045em] whitespace-nowrap",
+          "kyra-brand-wordmark-main font-hero font-extrabold tracking-[-0.045em] whitespace-nowrap",
           inverted ? "text-white" : "text-foreground",
           wordmarkSizes[size]
         )}
@@ -67,7 +69,7 @@ export function KyraWordmark({
       {showTagline && (
         <small
           className={cn(
-            "mt-1 font-mono text-[9px] tracking-[0.22em] uppercase whitespace-nowrap",
+            "kyra-brand-tagline mt-1 font-mono text-[9px] tracking-[0.22em] uppercase whitespace-nowrap",
             inverted ? "text-white/55" : "text-kyra-steel"
           )}
         >
@@ -97,6 +99,7 @@ export function KyraLogo({
   href = "/",
   priority = false,
   removeBackground = false,
+  inverted = false,
 }: KyraLogoProps) {
   const height = heights[size];
 
@@ -115,7 +118,8 @@ export function KyraLogo({
   const logo = removeBackground ? (
     <span
       className={cn(
-        "isolate inline-flex shrink-0 rounded-sm bg-background p-0.5",
+        "kyra-brand-logo-wrap isolate inline-flex shrink-0 rounded-sm p-0.5",
+        inverted ? "bg-black/70" : "bg-background",
         className
       )}
     >
@@ -125,7 +129,10 @@ export function KyraLogo({
         width={1024}
         height={1024}
         priority={priority}
-        className="w-auto mix-blend-darken object-contain"
+        className={cn(
+          "w-auto object-contain",
+          inverted ? "brightness-110 contrast-110" : "mix-blend-darken"
+        )}
         style={{ width: "auto", height: `${height}px` }}
       />
     </span>
@@ -161,6 +168,7 @@ export function KyraBrand({
         href={null}
         priority={priority}
         removeBackground={removeBackground}
+        inverted={inverted}
       />
       <KyraWordmark
         size={size}
