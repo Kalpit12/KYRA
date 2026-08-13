@@ -62,9 +62,10 @@ function WrapProjectCard({
   useEffect(() => {
     if (!active || !nextSrc) return;
     const run = () => prefetchOptimized(nextSrc);
-    if ("requestIdleCallback" in window) {
-      const id = window.requestIdleCallback(run, { timeout: 1200 });
-      return () => window.cancelIdleCallback(id);
+    const ric = window.requestIdleCallback?.bind(window);
+    if (ric) {
+      const id = ric(run, { timeout: 1200 });
+      return () => window.cancelIdleCallback?.(id);
     }
     const t = window.setTimeout(run, 300);
     return () => window.clearTimeout(t);
