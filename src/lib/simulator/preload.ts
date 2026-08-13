@@ -1,8 +1,5 @@
 import { resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
-import {
-  preloadStudioLogo,
-  warmStudioLockupTexture,
-} from "@/lib/simulator/studio-lockup";
+import { warmStudioLockupTexture } from "@/lib/simulator/studio-lockup";
 import { vehicleTypes } from "@/lib/data/simulator";
 
 const prefetchedModels = new Set<string>();
@@ -29,7 +26,6 @@ export function preloadSimulatorModel(modelPath: string) {
 }
 
 export function warmSimulatorRuntime() {
-  preloadStudioLogo();
   warmStudioLockupTexture();
   void import("@react-three/fiber");
   void import("@react-three/drei");

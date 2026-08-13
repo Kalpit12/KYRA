@@ -70,19 +70,19 @@ export function Navbar() {
         )}
       >
         <div className="container-kyra flex items-center gap-6 px-6 md:gap-8 md:px-12 lg:gap-12 lg:px-20">
-          <div
-            className={cn(
-              "relative z-10 shrink-0 pr-2",
-              lightOverHero &&
-                "[&>a>span>span:last-child>span:first-child]:text-white [&>a>span>span:last-child_small]:text-white/55"
-            )}
-          >
+          <div className="relative z-10 shrink-0 pr-2">
             {isCustoms ? (
               <KyraCustomsBrand size="sm" priority showTagline />
             ) : isWash ? (
               <KyraWashBrand size="sm" priority showTagline />
             ) : (
-              <KyraBrand size="sm" priority removeBackground showTagline />
+              <KyraBrand
+                size="sm"
+                priority
+                removeBackground
+                showTagline
+                inverted={lightOverHero}
+              />
             )}
           </div>
 

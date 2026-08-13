@@ -17,6 +17,8 @@ interface KyraWordmarkProps {
   href?: string | null;
   showTagline?: boolean;
   tagline?: string;
+  /** White wordmark for dark / transparent headers */
+  inverted?: boolean;
 }
 
 interface KyraBrandProps {
@@ -27,6 +29,8 @@ interface KyraBrandProps {
   tagline?: string;
   priority?: boolean;
   removeBackground?: boolean;
+  /** White wordmark for dark / transparent headers */
+  inverted?: boolean;
 }
 
 const heights = {
@@ -47,19 +51,26 @@ export function KyraWordmark({
   href = "/",
   showTagline = false,
   tagline = "Import · Customize · Maintain",
+  inverted = false,
 }: KyraWordmarkProps) {
   const mark = (
     <span className={cn("inline-flex flex-col whitespace-nowrap", className)}>
       <span
         className={cn(
-          "font-hero font-extrabold tracking-[-0.045em] text-foreground whitespace-nowrap",
+          "font-hero font-extrabold tracking-[-0.045em] whitespace-nowrap",
+          inverted ? "text-white" : "text-foreground",
           wordmarkSizes[size]
         )}
       >
         KYR<span className="text-kyra-red">Λ</span>
       </span>
       {showTagline && (
-        <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
+        <small
+          className={cn(
+            "mt-1 font-mono text-[9px] tracking-[0.22em] uppercase whitespace-nowrap",
+            inverted ? "text-white/55" : "text-kyra-steel"
+          )}
+        >
           {tagline}
         </small>
       )}
@@ -141,6 +152,7 @@ export function KyraBrand({
   tagline,
   priority = false,
   removeBackground = true,
+  inverted = false,
 }: KyraBrandProps) {
   const lockup = (
     <span className={cn("inline-flex items-center gap-3", className)}>
@@ -155,6 +167,7 @@ export function KyraBrand({
         href={null}
         showTagline={showTagline}
         tagline={tagline}
+        inverted={inverted}
       />
     </span>
   );

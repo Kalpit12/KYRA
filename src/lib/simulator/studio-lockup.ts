@@ -138,15 +138,3 @@ export function getStudioLockupTexture(): Promise<THREE.Texture | null> {
   warmStudioLockupTexture();
   return inflight ?? Promise.resolve(null);
 }
-
-export function preloadStudioLogo() {
-  if (typeof window === "undefined") return;
-  const linkId = "kyra-studio-logo-preload";
-  if (document.getElementById(linkId)) return;
-  const link = document.createElement("link");
-  link.id = linkId;
-  link.rel = "preload";
-  link.as = "image";
-  link.href = LOGO_SRC;
-  document.head.appendChild(link);
-}

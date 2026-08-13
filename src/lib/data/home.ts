@@ -123,31 +123,40 @@ export const latestVehicles: Vehicle[] = [
 
 export const wrapProjects: WrapProject[] = [
   {
-    id: "1",
-    title: "Midnight Matte M4",
-    vehicle: "BMW M4",
+    id: "bmw-x6m-holographic",
+    title: "Holographic Grey X6M",
+    vehicle: "BMW X6M",
+    finish: "Holographic",
+    color: "Grey · Carbon Fiber",
+    images: [
+      "/wraps/bmw-x6m-holographic/01.jpg",
+      "/wraps/bmw-x6m-holographic/02.jpg",
+      "/wraps/bmw-x6m-holographic/03.jpg",
+    ],
+  },
+  {
+    id: "gt86-ghost-black-green",
+    title: "Ghost Black Green GT 86",
+    vehicle: "Toyota GT 86",
     finish: "Matte",
-    color: "Midnight Black",
-    beforeImage: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=800&q=80",
-    afterImage: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=800&q=80",
+    color: "Ghost Black Green · Forged Carbon",
+    images: [
+      "/wraps/gt86-ghost-black-green/01.jpg",
+      "/wraps/gt86-ghost-black-green/02.jpg",
+      "/wraps/gt86-ghost-black-green/03.jpg",
+    ],
   },
   {
-    id: "2",
-    title: "Satin Red G-Wagon",
-    vehicle: "Mercedes G-Wagon",
-    finish: "Satin",
-    color: "Crimson Red",
-    beforeImage: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=800&q=80",
-    afterImage: "https://images.unsplash.com/photo-1617531653332-bd46c24f2068?w=800&q=80",
-  },
-  {
-    id: "3",
-    title: "Chrome Prado",
-    vehicle: "Toyota Prado",
-    finish: "Chrome",
-    color: "Silver Chrome",
-    beforeImage: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80",
-    afterImage: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80",
+    id: "porsche-911-ferrari-red",
+    title: "Ferrari Red 911 Carrera",
+    vehicle: "Porsche 911 Carrera",
+    finish: "Gloss",
+    color: "Ferrari Red",
+    images: [
+      "/wraps/porsche-911-ferrari-red/01.jpg",
+      "/wraps/porsche-911-ferrari-red/02.jpg",
+      "/wraps/porsche-911-ferrari-red/03.jpg",
+    ],
   },
 ];
 

@@ -504,4 +504,24 @@ h4 {
   }
 }
 
+@keyframes featured-wrap-progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+.featured-wrap-progress {
+  animation: featured-wrap-progress 4200ms linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .featured-wrap-progress {
+    animation: none;
+    width: 100%;
+  }
+}
+
 

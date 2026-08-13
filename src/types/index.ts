@@ -54,8 +54,8 @@ export interface WrapProject {
   vehicle: string;
   finish: string;
   color: string;
-  beforeImage: string;
-  afterImage: string;
+  /** Studio shots for the homepage featured-wraps slideshow */
+  images: string[];
 }
 
 export interface Testimonial {
