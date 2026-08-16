@@ -49,10 +49,10 @@ export const vehicleTypes: VehicleType[] = [
   {
     id: "sedan",
     name: "Sedan",
-    description: "Luxury sedan with elegant design",
+    description: "BMW M3 Competition — luxury performance sedan",
     features: ["Premium comfort", "Executive styling", "Advanced technology"],
     vehicleId: "bmw-m4",
-    modelPath: "/models/86ql3dghcf0.glb",
+    modelPath: "/models/t7iquki8rj.glb",
   },
   {
     id: "suv",
@@ -236,11 +236,11 @@ export const windowFilms: WindowFilm[] = [
     id: "oem-clear",
     name: "OEM Clear",
     overlayOpacity: 0.05,
-    overlayColor: "#d5dde8",
+    overlayColor: "#e8eef4",
     roughness: 0.03,
     transmission: 0.92,
     thickness: 0.004,
-    attenuationDistance: 3.2,
+    attenuationDistance: 8,
   },
   {
     id: "crystalline-70",

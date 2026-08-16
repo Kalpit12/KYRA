@@ -13,6 +13,9 @@ const CEILING = "#f8f8f9";
 const FLOOR = "#efeff1";
 const LOGO_SRC = "/kyra-customs-logo.jpg";
 
+/** Cylinder pad: center 0.03, height 0.06 → top face */
+export const STUDIO_PAD_TOP = 0.06;
+
 function lockupAspect(texture: THREE.Texture) {
   const image = texture.image as { width?: number; height?: number } | undefined;
   if (!image?.width || !image?.height) return 2048 / 520;
@@ -57,7 +60,7 @@ function CeilingSoftbox({
   return (
     <mesh position={position}>
       <boxGeometry args={scale} />
-      <meshBasicMaterial color="#ffffff" />
+      <meshStandardMaterial color="#e6e6ea" roughness={1} metalness={0} envMapIntensity={0} />
     </mesh>
   );
 }
@@ -136,16 +139,21 @@ export function StudioEnvironment({ receiveShadow = true }: { receiveShadow?: bo
 
       <group position={[0, 0.03, 0]}>
         <mesh receiveShadow={receiveShadow}>
-          <cylinderGeometry args={[4.05, 4.05, 0.06, 72]} />
-          <meshStandardMaterial color="#3c4046" metalness={0.82} roughness={0.32} />
+          <cylinderGeometry args={[4.05, 4.05, 0.06, 64]} />
+          <meshStandardMaterial
+            color="#2a2c30"
+            metalness={0}
+            roughness={0.86}
+            envMapIntensity={0}
+          />
         </mesh>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.032, 0]}>
-          <ringGeometry args={[3.72, 3.92, 72]} />
-          <meshStandardMaterial color="#8b9098" metalness={0.88} roughness={0.22} />
+          <ringGeometry args={[3.72, 3.92, 64]} />
+          <meshBasicMaterial color="#3f4348" />
         </mesh>
         <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.033, 0]}>
-          <ringGeometry args={[2.35, 2.48, 72]} />
-          <meshStandardMaterial color="#6a7078" metalness={0.86} roughness={0.26} />
+          <ringGeometry args={[2.35, 2.48, 64]} />
+          <meshBasicMaterial color="#35383c" />
         </mesh>
       </group>
     </group>

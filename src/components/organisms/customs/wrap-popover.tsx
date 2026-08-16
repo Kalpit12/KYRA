@@ -64,7 +64,9 @@ export function WrapPopover({
             onClick={() => onFinishChange(item.id)}
             className={cn(
               "relative z-10 flex-1 px-3 py-1.5 font-mono text-[10px] tracking-[0.06em] uppercase transition-colors",
-              finish === item.id ? "text-white" : "text-white/55"
+              finish === item.id
+                ? "text-[color:var(--btn-primary-fg)]"
+                : "text-white/55"
             )}
           >
             {finish === item.id && (
@@ -88,7 +90,7 @@ export function WrapPopover({
             className={cn(
               "shrink-0 border px-3 py-1 font-mono text-[10px] tracking-[0.06em] uppercase transition sm:text-xs",
               category === item.id
-                ? "border-kyra-red bg-kyra-red text-white"
+                ? "border-kyra-red bg-kyra-red text-[color:var(--btn-primary-fg)]"
                 : "border-white/15 text-white/55 hover:border-kyra-red hover:text-white"
             )}
           >

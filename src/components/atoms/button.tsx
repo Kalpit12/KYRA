@@ -12,7 +12,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "btn-cut-tr bg-kyra-red text-white shadow-[0_4px_0_0_var(--kyra-red-dark)] hover:-translate-y-0.5 hover:bg-kyra-red-hover hover:shadow-[0_6px_20px_var(--kyra-red-glow)] active:translate-y-0 active:shadow-[0_2px_0_0_var(--kyra-red-dark)]",
+          "btn-cut-tr bg-kyra-red text-[color:var(--btn-primary-fg)] shadow-[0_4px_0_0_var(--kyra-red-dark)] hover:-translate-y-0.5 hover:bg-kyra-red-hover hover:shadow-[0_6px_20px_var(--kyra-red-glow)] active:translate-y-0 active:shadow-[0_2px_0_0_var(--kyra-red-dark)]",
         secondary:
           "btn-cut-bl border border-border bg-muted/60 text-foreground before:absolute before:top-0 before:left-0 before:h-full before:w-[3px] before:origin-top before:scale-y-0 before:bg-kyra-red before:transition-transform before:duration-200 hover:border-kyra-red/40 hover:bg-panel hover:before:scale-y-100",
         ghost:

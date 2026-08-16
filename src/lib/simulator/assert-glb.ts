@@ -7,7 +7,7 @@ export type GlbStatus = "checking" | "ready" | "invalid";
 const GLB_MAGIC = "glTF";
 
 /** Bust stale browser cache from the Git LFS pointer / Range-check era. */
-export const SIMULATOR_MODEL_CACHE_VERSION = "3";
+export const SIMULATOR_MODEL_CACHE_VERSION = "6";
 
 export function resolveSimulatorModelUrl(path: string) {
   const base = path.split("?")[0] ?? path;

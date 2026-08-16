@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Button } from "@/components/atoms/button";
-import { KyraLogo } from "@/components/atoms/kyra-logo";
+import { KyraLogo, KyraWordmark } from "@/components/atoms/kyra-logo";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -89,12 +89,9 @@ export default function AdminLoginForm() {
       <div className="w-full max-w-md border border-border bg-background p-6 sm:p-8">
         <div className="flex flex-col items-center text-center">
           <KyraLogo size="md" href={null} removeBackground priority />
-          <span className="mt-4 font-hero text-[2.25rem] font-extrabold leading-none tracking-[-0.045em]">
-            <span className="text-flow-red">KYRΛ</span>
-          </span>
-          <small className="mt-2 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase">
-            Import · Customize · Maintain
-          </small>
+          <div className="mt-4">
+            <KyraWordmark size="md" href={null} showTagline />
+          </div>
         </div>
 
         <h1 className="mt-8 text-center font-display text-2xl font-semibold italic uppercase text-foreground">

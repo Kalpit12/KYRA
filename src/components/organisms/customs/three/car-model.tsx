@@ -2,20 +2,22 @@
 
 import { useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
 import { finishPresets, hexToThreeColor } from "@/lib/simulator/finish-presets";
 import { getCarbonTextures } from "@/lib/simulator/carbon-texture";
 import {
+  classifyGlassBlackMeshes,
   isBodyMaterial,
   isBodyMesh,
-  isBrakeMaterial,
   isGlassMesh,
-  isLampCoverGlassMesh,
   isLensGlassMaterial,
-  isLightMaterial,
   isWindowGlassMaterial,
   normalizeModel,
+  sanitizeWorkshopModel,
+  sharpenMaterialTextures,
+  sharpenSceneTextures,
 } from "@/lib/simulator/mesh-utils";
 import type { WrapFinishId, WrapOption, WindowFilm } from "@/lib/data/simulator";
 
@@ -30,115 +32,66 @@ interface CarModelProps {
   liteMaterials?: boolean;
 }
 
-/** Phantom-style physical window glass from film preset */
+/**
+ * Cabin glass: FrontSide + opacity (no transmission). Transmission + double-sided
+ * glass refracts interior lights into magenta/cyan blobs and a second windshield.
+ */
 function createWindowGlassMaterial(tint: WindowFilm, lite = false) {
+  const film = new THREE.Color(tint.overlayColor);
+  const vlt = THREE.MathUtils.clamp(tint.transmission, 0, 1);
+  const glassColor = new THREE.Color("#eef3f8").lerp(film, 1 - vlt);
+  const opacity = THREE.MathUtils.clamp(0.16 + (1 - vlt) * 0.62, 0.16, 0.78);
+
   if (lite) {
     return new THREE.MeshStandardMaterial({
       name: `WindowTint:${tint.id}`,
-      color: new THREE.Color(tint.overlayColor),
-      metalness: 0.05,
-      roughness: Math.max(tint.roughness, 0.12),
+      color: glassColor,
+      metalness: 0,
+      roughness: Math.max(tint.roughness, 0.1),
       transparent: true,
-      opacity: Math.min(0.92, 0.35 + tint.overlayOpacity * 0.9),
-      envMapIntensity: 0.8,
+      opacity,
+      envMapIntensity: 0.28,
+      depthWrite: true,
+      side: THREE.FrontSide,
     });
   }
 
   return new THREE.MeshPhysicalMaterial({
     name: `WindowTint:${tint.id}`,
-    color: new THREE.Color(tint.overlayColor),
+    color: glassColor,
     metalness: 0,
-    roughness: tint.roughness,
-    transmission: tint.transmission,
-    thickness: tint.thickness,
-    ior: 1.45,
+    roughness: Math.max(0.06, tint.roughness),
+    transmission: 0,
     transparent: true,
-    opacity: 1,
-    attenuationColor: new THREE.Color(tint.overlayColor),
-    attenuationDistance: tint.attenuationDistance,
-    envMapIntensity: 1.35,
-    specularIntensity: 1,
+    opacity,
+    envMapIntensity: 0.32,
+    specularIntensity: 0.25,
+    depthWrite: true,
+    side: THREE.FrontSide,
   });
 }
 
-/** Clear / colored lamp lenses — never receive dark cabin tint */
-function createLensGlassMaterial(source: THREE.Material, lite = false) {
+/** Clear headlamp / red tail covers — never cabin tint */
+function createLensGlassMaterial(source: THREE.Material) {
   const name = (source.name || "").toLowerCase();
-  // Only GlassRed / *red* materials get red lenses — never GlassBlack covers
   const isRed = name.includes("red") && !name.includes("glassblack");
-  const color = isRed ? "#ff1a1a" : "#e8eef5";
-  const emissive = isRed ? "#ff2200" : "#000000";
-
-  if (lite) {
-    return new THREE.MeshStandardMaterial({
-      name: source.name || "LensGlass",
-      color: new THREE.Color(color),
-      metalness: 0.15,
-      roughness: 0.18,
-      transparent: true,
-      opacity: isRed ? 0.7 : 0.35,
-      emissive: new THREE.Color(emissive),
-      emissiveIntensity: isRed ? 0.25 : 0,
-    });
-  }
 
   return new THREE.MeshPhysicalMaterial({
-    name: source.name || "LensGlass",
-    color: new THREE.Color(color),
+    name: isRed ? source.name || "GlassRed" : "GlassWhite",
+    color: new THREE.Color(isRed ? "#ff2a2a" : "#f2f6fb"),
     metalness: 0,
-    roughness: 0.06,
-    transmission: isRed ? 0.5 : 0.92,
-    thickness: 0.01,
+    roughness: isRed ? 0.08 : 0.04,
+    transmission: isRed ? 0.55 : 0.92,
+    thickness: 0.012,
     ior: 1.5,
     transparent: true,
     opacity: 1,
     attenuationColor: new THREE.Color(isRed ? "#ff1a1a" : "#ffffff"),
-    attenuationDistance: isRed ? 0.5 : 4,
-    emissive: new THREE.Color(emissive),
-    emissiveIntensity: isRed ? 0.3 : 0,
-    envMapIntensity: 1.35,
+    attenuationDistance: isRed ? 0.55 : 4,
+    envMapIntensity: 1.25,
+    depthWrite: false,
+    side: THREE.FrontSide,
   });
-}
-
-/** Headlight / taillight emitters — parked “off” look (reflector, not lit) */
-function enhanceLightMaterial(source: THREE.Material) {
-  const mat = source.clone() as THREE.MeshStandardMaterial;
-  const name = (source.name || "").toLowerCase();
-  const isRed = name.includes("red");
-
-  if (!mat.emissive) {
-    mat.emissive = new THREE.Color("#000000");
-  }
-
-  if (isRed) {
-    // Soft parked taillight plastic — not glowing
-    mat.color = new THREE.Color("#5a1010");
-    mat.emissive.set("#1a0505");
-    mat.emissiveIntensity = 0.08;
-    mat.roughness = Math.min(mat.roughness ?? 1, 0.45);
-    mat.metalness = Math.min(mat.metalness ?? 0, 0.2);
-  } else {
-    // Chrome / silver reflector cup — headlights off
-    mat.color = new THREE.Color("#c8d0da");
-    mat.emissive.set("#000000");
-    mat.emissiveIntensity = 0;
-    mat.roughness = Math.min(mat.roughness ?? 1, 0.28);
-    mat.metalness = Math.max(mat.metalness ?? 0, 0.75);
-    mat.envMapIntensity = 1.6;
-  }
-
-  mat.toneMapped = true;
-  mat.needsUpdate = true;
-  return mat;
-}
-
-function enhanceBrakeMaterial(source: THREE.Material) {
-  const mat = source.clone() as THREE.MeshStandardMaterial;
-  // Keep original albedo/maps; lift metal response so discs/calipers read in studio light
-  mat.metalness = Math.max(mat.metalness ?? 0, 0.65);
-  mat.roughness = Math.min(mat.roughness ?? 1, 0.38);
-  mat.envMapIntensity = 1.35;
-  return mat;
 }
 
 /** Lift near-black carbon tints so weave map * color still reads as fibre */
@@ -151,7 +104,9 @@ function carbonTintColor(hex: string) {
   return c;
 }
 
+/** Keep factory maps / clearcoat / IOR; only retint for the chosen wrap. */
 function createBodyMaterial(
+  source: THREE.Material | undefined,
   wrap: WrapOption,
   finish: WrapFinishId,
   primaryColor: string,
@@ -159,18 +114,38 @@ function createBodyMaterial(
 ) {
   const preset = finishPresets[finish];
   const isCarbon = finish === "carbon" || wrap.category === "carbon";
+  const from =
+    source instanceof THREE.MeshPhysicalMaterial
+      ? source.clone()
+      : source instanceof THREE.MeshStandardMaterial
+        ? new THREE.MeshPhysicalMaterial({
+            map: source.map,
+            normalMap: source.normalMap,
+            roughnessMap: source.roughnessMap,
+            metalnessMap: source.metalnessMap,
+            aoMap: source.aoMap,
+            emissiveMap: source.emissiveMap,
+            normalScale: source.normalScale?.clone(),
+            side: source.side,
+          })
+        : new THREE.MeshPhysicalMaterial();
 
-  const bodyMat = new THREE.MeshPhysicalMaterial({
-    color: new THREE.Color(hexToThreeColor(primaryColor)),
-    metalness: preset.metalness,
-    roughness: preset.roughness,
-    clearcoat: preset.clearcoat,
-    clearcoatRoughness: preset.clearcoatRoughness,
-    envMapIntensity: preset.envMapIntensity,
-  });
+  from.name = source?.name || "CarPaint";
+  from.side = THREE.FrontSide;
+  from.polygonOffset = true;
+  from.polygonOffsetFactor = 1;
+  from.polygonOffsetUnits = 1;
+  from.color = new THREE.Color(hexToThreeColor(primaryColor));
+  from.metalness = preset.metalness;
+  from.roughness = preset.roughness;
+  from.clearcoat = preset.clearcoat;
+  from.clearcoatRoughness = preset.clearcoatRoughness;
+  from.envMapIntensity = preset.envMapIntensity;
+  from.ior = 1.45;
+  from.specularIntensity = 1;
 
   if (wrap.colors.length > 1) {
-    bodyMat.color.lerp(new THREE.Color(hexToThreeColor(secondaryColor)), 0.35);
+    from.color.lerp(new THREE.Color(hexToThreeColor(secondaryColor)), 0.35);
   }
 
   if (isCarbon) {
@@ -179,23 +154,23 @@ function createBodyMaterial(
       forged ? "forged" : "twill"
     );
 
-    bodyMat.map = map;
-    bodyMat.normalMap = normalMap;
-    bodyMat.normalScale = new THREE.Vector2(1.15, 1.15);
-    bodyMat.roughnessMap = roughnessMap;
-    bodyMat.metalness = finishPresets.carbon.metalness;
-    bodyMat.roughness = finishPresets.carbon.roughness;
-    bodyMat.clearcoat = finishPresets.carbon.clearcoat;
-    bodyMat.clearcoatRoughness = finishPresets.carbon.clearcoatRoughness;
-    bodyMat.envMapIntensity = finishPresets.carbon.envMapIntensity;
-    // Tint weave (lifted) — map carries fibre contrast; clearcoat adds resin gloss
-    bodyMat.color = carbonTintColor(primaryColor);
+    from.map = map;
+    from.normalMap = normalMap;
+    from.normalScale = new THREE.Vector2(1.15, 1.15);
+    from.roughnessMap = roughnessMap;
+    from.metalness = finishPresets.carbon.metalness;
+    from.roughness = finishPresets.carbon.roughness;
+    from.clearcoat = finishPresets.carbon.clearcoat;
+    from.clearcoatRoughness = finishPresets.carbon.clearcoatRoughness;
+    from.envMapIntensity = finishPresets.carbon.envMapIntensity;
+    from.color = carbonTintColor(primaryColor);
     if (wrap.colors.length > 1) {
-      bodyMat.color.lerp(carbonTintColor(secondaryColor), 0.25);
+      from.color.lerp(carbonTintColor(secondaryColor), 0.25);
     }
   }
 
-  return bodyMat;
+  from.needsUpdate = true;
+  return from;
 }
 export function CarModel({
   modelPath,
@@ -208,37 +183,48 @@ export function CarModel({
 }: CarModelProps) {
   useGLTF.setDecoderPath(DRACO_DECODER_PATH);
   const { scene } = useGLTF(modelPath, DRACO_DECODER_PATH);
+  const anisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
   const primaryColor = wrap.colors[0];
   const secondaryColor = wrap.colors[1] ?? wrap.colors[0];
 
   const clonedScene = useMemo(() => {
     const clone = scene.clone(true);
-    const bodyMat = createBodyMaterial(wrap, finish, primaryColor, secondaryColor);
+    sharpenSceneTextures(clone, anisotropy);
+
+    let paintSource: THREE.Material | undefined;
+    clone.traverse((child) => {
+      if (!(child instanceof THREE.Mesh)) return;
+      const mats = Array.isArray(child.material) ? child.material : [child.material];
+      paintSource ??= mats.find((mat) => mat && isBodyMaterial(mat));
+    });
+
+    const { lamps: lampMeshes } = classifyGlassBlackMeshes(clone);
+    const bodyMat = createBodyMaterial(
+      paintSource,
+      wrap,
+      finish,
+      primaryColor,
+      secondaryColor
+    );
+    sharpenMaterialTextures(bodyMat, anisotropy);
     const windowGlassMat = createWindowGlassMaterial(tint, liteMaterials);
 
     clone.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return;
 
-      // Heavy studio meshes: skip casting shadows from tiny trim to cut draw cost
       child.castShadow = false;
       child.receiveShadow = enableShadows;
       child.frustumCulled = true;
 
       const sourceMats = Array.isArray(child.material) ? child.material : [child.material];
+      const isLampMesh = lampMeshes.has(child);
       const nextMats = sourceMats.map((mat) => {
         if (!mat) return mat;
-
-        // Sedan quirk: GlassBlack on thin lamp covers → clear lens (not cabin tint / not red)
-        if (isLampCoverGlassMesh(child, mat)) {
-          return createLensGlassMaterial(mat, liteMaterials);
+        if (isLampMesh || isLensGlassMaterial(mat)) {
+          return createLensGlassMaterial(mat);
         }
-
         if (isWindowGlassMaterial(mat)) return windowGlassMat;
-        if (isLensGlassMaterial(mat)) return createLensGlassMaterial(mat, liteMaterials);
-        if (isLightMaterial(mat)) return enhanceLightMaterial(mat);
-        if (isBrakeMaterial(mat)) return enhanceBrakeMaterial(mat);
         if (isBodyMaterial(mat)) return bodyMat;
-
         return mat;
       });
 
@@ -250,13 +236,13 @@ export function CarModel({
           child.castShadow = true;
           child.receiveShadow = true;
         }
-        if (nextMats.some((mat) => mat === windowGlassMat || (mat && isLensGlassMaterial(mat)))) {
+        if (isLampMesh || nextMats.some((mat) => mat === windowGlassMat)) {
           child.castShadow = false;
         }
         return;
       }
 
-      if (sourceMats.length === 1 && isGlassMesh(child)) {
+      if (sourceMats.length === 1 && isGlassMesh(child) && !isLampMesh) {
         child.material = windowGlassMat;
         child.castShadow = false;
         return;
@@ -271,6 +257,7 @@ export function CarModel({
       }
     });
 
+    sanitizeWorkshopModel(clone);
     normalizeModel(clone, 4.2 * (modelScale ?? 1));
     clone.position.set(0, 0, 0);
     return clone;
@@ -284,6 +271,7 @@ export function CarModel({
     modelScale,
     enableShadows,
     liteMaterials,
+    anisotropy,
   ]);
 
   return <primitive object={clonedScene} />;

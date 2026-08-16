@@ -51,8 +51,8 @@ const tierCardStyles: Record<
   },
   premium: {
     base: "border-t-2 border-t-kyra-red/70",
-    selected: "ring-1 ring-inset ring-kyra-red border-t-kyra-red shadow-[0_0_40px_rgba(226,19,31,0.08)]",
-    badge: "bg-kyra-red text-white",
+    selected: "ring-1 ring-inset ring-kyra-red border-t-kyra-red shadow-[0_0_40px_rgba(236,233,233,0.08)]",
+    badge: "bg-kyra-red text-[color:var(--btn-primary-fg)]",
   },
   platinum: {
     base: "border-t-2 border-t-kyra-platinum/50",
@@ -123,7 +123,7 @@ export function WashContent() {
   };
 
   return (
-    <>
+    <div data-wash-theme>
       <PageHero
         eyebrow="KYRA Premium Carwash"
         title="Clean. Shine. Elevate."
@@ -188,7 +188,7 @@ export function WashContent() {
 
                   {isSelected && (
                     <span className="absolute top-4 left-4 flex h-6 w-6 items-center justify-center bg-kyra-red">
-                      <Check size={14} className="text-white" />
+                      <Check size={14} className="text-[color:var(--btn-primary-fg)]" />
                     </span>
                   )}
 
@@ -280,7 +280,7 @@ export function WashContent() {
                     className="flex min-h-[420px] flex-col items-center justify-center text-center"
                   >
                     <div className="flex h-20 w-20 items-center justify-center bg-kyra-red">
-                      <Check size={36} className="text-white" />
+                      <Check size={36} className="text-[color:var(--btn-primary-fg)]" />
                     </div>
                     <h3 className="mt-6 font-display text-2xl font-semibold italic uppercase text-foreground">
                       Booking Confirmed
@@ -434,8 +434,8 @@ export function WashContent() {
         </div>
       )}
 
-      <TradeBand />
+      <TradeBand className="border-t border-kyra-red/35 !bg-black" />
       <WhatsAppFloat phone={WASH_WHATSAPP} className="bottom-24 md:bottom-8" />
-    </>
+    </div>
   );
 }

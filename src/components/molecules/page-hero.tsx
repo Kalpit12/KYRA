@@ -38,7 +38,7 @@ export function PageHero({
         <>
           <PageHeroVideo src={backgroundVideo} poster={backgroundImage} />
           <div className="absolute inset-0 bg-gradient-to-t from-background from-25% via-background/75 via-45% to-background/25" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(226,19,31,0.12),transparent_55%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--hero-glow),transparent_55%)]" />
         </>
       ) : backgroundImage ? (
         <>
@@ -60,7 +60,7 @@ export function PageHero({
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse 60% 50% at 80% 20%, rgba(226,19,31,0.10), transparent 60%), var(--background)",
+              "radial-gradient(ellipse 60% 50% at 80% 20%, var(--hero-glow), transparent 60%), var(--background)",
           }}
         />
       )}

@@ -10,32 +10,32 @@ export interface FinishPreset {
 
 export const finishPresets: Record<WrapFinishId, FinishPreset> = {
   gloss: {
-    roughness: 0.08,
-    metalness: 0.15,
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
-    envMapIntensity: 1.9,
-  },
-  satin: {
-    roughness: 0.42,
+    roughness: 0.14,
     metalness: 0.1,
-    clearcoat: 0.42,
-    clearcoatRoughness: 0.3,
-    envMapIntensity: 1.3,
-  },
-  matte: {
-    roughness: 0.88,
-    metalness: 0.04,
-    clearcoat: 0.05,
-    clearcoatRoughness: 0.8,
+    clearcoat: 0.72,
+    clearcoatRoughness: 0.12,
     envMapIntensity: 0.95,
   },
-  carbon: {
+  satin: {
     roughness: 0.38,
-    metalness: 0.22,
+    metalness: 0.12,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.22,
+    envMapIntensity: 1.2,
+  },
+  matte: {
+    roughness: 0.82,
+    metalness: 0.05,
+    clearcoat: 0.08,
+    clearcoatRoughness: 0.72,
+    envMapIntensity: 0.85,
+  },
+  carbon: {
+    roughness: 0.34,
+    metalness: 0.24,
     clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    envMapIntensity: 1.75,
+    clearcoatRoughness: 0.06,
+    envMapIntensity: 1.15,
   },
 };
 

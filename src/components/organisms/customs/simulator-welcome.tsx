@@ -38,8 +38,16 @@ export function SimulatorWelcome({ onStart }: SimulatorWelcomeProps) {
       className="relative min-h-[52vh] overflow-hidden py-16 md:min-h-[calc(100vh-5rem)] md:py-0"
     >
       <PageHeroVideo src={CUSTOMS_HERO_VIDEO} poster={CUSTOMS_HERO_POSTER} />
-      <div className="absolute inset-0 bg-gradient-to-r from-background/55 via-background/20 to-transparent" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/50 via-transparent to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-r from-background via-background/55 to-background/15" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at 18% 78%, rgba(220, 166, 174, 0.16), transparent 52%)",
+        }}
+        aria-hidden
+      />
 
       <div className="container-kyra relative z-10 flex min-h-[52vh] flex-col items-center justify-center px-6 md:min-h-[calc(100vh-5rem)] lg:flex-row lg:items-center lg:justify-between lg:gap-16 lg:px-20">
         <div className="max-w-xl text-center lg:text-left">

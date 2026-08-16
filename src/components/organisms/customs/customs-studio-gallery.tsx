@@ -265,7 +265,7 @@ export function CustomsStudioGallery() {
             <button
               type="button"
               onClick={() => setActiveId(null)}
-              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red"
+              className="absolute top-4 right-4 z-20 flex h-10 w-10 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red-dark"
               aria-label="Close"
             >
               <X size={18} />
@@ -281,7 +281,7 @@ export function CustomsStudioGallery() {
                   ];
                 setActiveId(prev.id);
               }}
-              className="absolute top-1/2 left-3 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red sm:left-6"
+              className="absolute top-1/2 left-3 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red-dark sm:left-6"
               aria-label="Previous image"
             >
               <ChevronLeft size={20} />
@@ -295,7 +295,7 @@ export function CustomsStudioGallery() {
                   ];
                 setActiveId(next.id);
               }}
-              className="absolute top-1/2 right-3 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red sm:right-6"
+              className="absolute top-1/2 right-3 z-20 flex h-11 w-11 -translate-y-1/2 items-center justify-center border border-white/25 bg-black/50 text-white transition hover:border-kyra-red hover:bg-kyra-red-dark sm:right-6"
               aria-label="Next image"
             >
               <ChevronRight size={20} />

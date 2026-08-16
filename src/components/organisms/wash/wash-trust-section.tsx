@@ -56,7 +56,7 @@ export function WashTrustSection() {
             {washProductBrands.map((brand) => (
               <span
                 key={brand}
-                className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-[#6d6d70] transition hover:text-foreground sm:text-base"
+                className="font-display text-sm font-semibold uppercase tracking-[0.08em] text-kyra-steel transition hover:text-foreground sm:text-base"
               >
                 {brand}
               </span>

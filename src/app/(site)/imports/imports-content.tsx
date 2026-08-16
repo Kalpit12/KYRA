@@ -163,7 +163,9 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
         title="Find your next drive."
         subtitle="Curated luxury vehicles, hand-selected and imported with full documentation and a complete import dossier."
         showChevrons
-        backgroundImage="/instagram/DZCTN25CAGy.jpg"
+        showShard={false}
+        backgroundVideo="/video/urus-imports-hero.mp4"
+        backgroundImage="/video/posters/urus-imports-hero.jpg"
       />
 
       <MakesStrip activeMake={filters.brand} onSelect={handleMakeSelect} />

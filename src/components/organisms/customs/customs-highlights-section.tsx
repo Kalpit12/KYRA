@@ -146,7 +146,7 @@ function HighlightReel({
               e.stopPropagation();
               void togglePlay();
             }}
-            className="flex h-9 w-9 items-center justify-center border border-white/25 bg-black/50 text-white backdrop-blur-sm transition hover:border-kyra-red hover:bg-kyra-red"
+            className="flex h-9 w-9 items-center justify-center border border-white/25 bg-black/50 text-white backdrop-blur-sm transition hover:border-kyra-red hover:bg-kyra-red-dark"
             aria-label={playing ? "Pause" : "Play"}
           >
             {playing ? <Pause size={14} /> : <Play size={14} className="ml-0.5" />}
@@ -157,7 +157,7 @@ function HighlightReel({
               e.stopPropagation();
               setMuted((m) => !m);
             }}
-            className="flex h-9 w-9 items-center justify-center border border-white/25 bg-black/50 text-white backdrop-blur-sm transition hover:border-kyra-red hover:bg-kyra-red"
+            className="flex h-9 w-9 items-center justify-center border border-white/25 bg-black/50 text-white backdrop-blur-sm transition hover:border-kyra-red hover:bg-kyra-red-dark"
             aria-label={muted ? "Unmute" : "Mute"}
           >
             {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}

@@ -46,7 +46,7 @@ const CustomsInstagramSection = dynamic(
 
 export function CustomsContent() {
   return (
-    <>
+    <div data-customs-theme>
       <WrapSimulator />
 
       <CustomsStudioGallery />
@@ -66,8 +66,8 @@ export function CustomsContent() {
         </div>
       </section>
 
-      <TradeBand />
+      <TradeBand className="border-t border-kyra-red/35 !bg-black" />
       <WhatsAppFloat />
-    </>
+    </div>
   );
 }

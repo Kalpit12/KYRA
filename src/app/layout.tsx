@@ -4,6 +4,8 @@ import {
   Barlow_Condensed,
   Plus_Jakarta_Sans,
   IBM_Plex_Mono,
+  Outfit,
+  Saira_Extra_Condensed,
 } from "next/font/google";
 import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
@@ -34,6 +36,20 @@ const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-plex",
   subsets: ["latin"],
   weight: ["400", "500"],
+  display: "swap",
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+  display: "swap",
+});
+
+const sairaExtraCondensed = Saira_Extra_Condensed({
+  variable: "--font-saira",
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
   display: "swap",
 });
 
@@ -96,7 +112,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${plusJakarta.variable} ${barlowCondensed.variable} ${syne.variable} ${ibmPlexMono.variable} bg-background text-foreground antialiased`}
+        className={`${plusJakarta.variable} ${barlowCondensed.variable} ${syne.variable} ${ibmPlexMono.variable} ${outfit.variable} ${sairaExtraCondensed.variable} bg-background text-foreground antialiased`}
         suppressHydrationWarning
       >
         {children}

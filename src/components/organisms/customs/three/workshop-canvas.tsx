@@ -4,6 +4,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { KyraLoader } from "@/components/atoms/kyra-loader";
 import { Canvas, useThree } from "@react-three/fiber";
 import {
+  AdaptiveDpr,
   ContactShadows,
   Html,
   OrbitControls,
@@ -12,7 +13,7 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { CarModel } from "@/components/organisms/customs/three/car-model";
-import { StudioEnvironment } from "@/components/organisms/customs/three/studio-environment";
+import { StudioEnvironment, STUDIO_PAD_TOP } from "@/components/organisms/customs/three/studio-environment";
 import { StudioLights } from "@/components/organisms/customs/three/studio-lights";
 import { silenceThreeClockDeprecation } from "@/lib/three/silence-clock-deprecation";
 import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
@@ -58,6 +59,43 @@ function ContextLostGuard({ onLost }: { onLost: () => void }) {
   return null;
 }
 
+function RenderWhenPropsChange({
+  token,
+}: {
+  token: string;
+}) {
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    invalidate();
+  }, [invalidate, token]);
+  return null;
+}
+
+function StudioControls({
+  isPreview,
+}: {
+  isPreview: boolean;
+}) {
+  const invalidate = useThree((state) => state.invalidate);
+
+  return (
+    <OrbitControls
+      target={[0, 0.72, 0]}
+      enablePan={false}
+      enableZoom={!isPreview}
+      autoRotate={false}
+      minDistance={3.1}
+      maxDistance={8.5}
+      minPolarAngle={Math.PI / 5.5}
+      maxPolarAngle={Math.PI / 2.12}
+      enableDamping
+      dampingFactor={0.08}
+      onChange={() => invalidate()}
+      onEnd={() => invalidate()}
+    />
+  );
+}
+
 function WorkshopScene({
   modelPath,
   modelScale,
@@ -65,21 +103,19 @@ function WorkshopScene({
   finish,
   tint,
   performanceMode = "full",
-  liteMaterials,
   onContextLost,
-}: WorkshopCanvasProps & { liteMaterials: boolean; onContextLost: () => void }) {
+}: WorkshopCanvasProps & { onContextLost: () => void }) {
   const isPreview = performanceMode === "preview";
-  const [autoRotate, setAutoRotate] = useState(!isPreview);
 
   return (
     <Canvas
       shadows={!isPreview}
-      dpr={isPreview ? 1 : [1, 1.25]}
-      frameloop="always"
+      dpr={isPreview ? 1 : [1, 1.5]}
+      frameloop="demand"
       gl={{
-        antialias: !isPreview && !liteMaterials,
+        antialias: true,
         alpha: false,
-        powerPreference: "default",
+        powerPreference: "high-performance",
         toneMapping: THREE.ACESFilmicToneMapping,
         stencil: false,
         depth: true,
@@ -87,12 +123,17 @@ function WorkshopScene({
         preserveDrawingBuffer: false,
       }}
       onCreated={({ gl }) => {
-        gl.toneMappingExposure = isPreview ? 1.06 : 1.04;
+        gl.toneMappingExposure = isPreview ? 1.06 : 1.08;
+        gl.outputColorSpace = THREE.SRGBColorSpace;
         gl.shadowMap.enabled = !isPreview;
         gl.shadowMap.type = THREE.PCFShadowMap;
       }}
       className="h-full w-full"
     >
+      <AdaptiveDpr pixelated={false} />
+      <RenderWhenPropsChange
+        token={`${modelPath}:${wrap.id}:${finish}:${tint.id}:${modelScale ?? 1}`}
+      />
       <ContextLostGuard onLost={onContextLost} />
       <color attach="background" args={["#ececee"]} />
 
@@ -101,49 +142,35 @@ function WorkshopScene({
         position={isPreview ? [3.4, 1.35, 4.4] : [3.55, 1.28, 4.85]}
         fov={isPreview ? 40 : 34}
       />
-      <OrbitControls
-        target={[0, 0.72, 0]}
-        enablePan={false}
-        enableZoom={!isPreview}
-        autoRotate={autoRotate}
-        autoRotateSpeed={isPreview ? 0.55 : 0.22}
-        minDistance={3.1}
-        maxDistance={8.5}
-        minPolarAngle={Math.PI / 5.5}
-        maxPolarAngle={Math.PI / 2.12}
-        enableDamping
-        dampingFactor={0.06}
-        onStart={() => setAutoRotate(false)}
-      />
-
-      <StudioLights preview={isPreview || liteMaterials} />
+      <StudioControls isPreview={isPreview} />
 
       <Suspense
         fallback={
           <LoadingFallback label={isPreview ? "Loading preview" : "Loading studio"} />
         }
       >
-        <StudioEnvironment receiveShadow={!isPreview && !liteMaterials} />
-        <group position={[0, 0.07, 0]}>
+        <StudioLights preview={isPreview} />
+        <StudioEnvironment receiveShadow={!isPreview} />
+        <group position={[0, STUDIO_PAD_TOP + 0.004, 0]}>
           <CarModel
             modelPath={modelPath}
             modelScale={modelScale}
             wrap={wrap}
             finish={finish}
             tint={tint}
-            enableShadows={!isPreview && !liteMaterials}
-            liteMaterials={isPreview || liteMaterials}
+            enableShadows={!isPreview}
+            liteMaterials={isPreview}
           />
         </group>
-        {!isPreview && !liteMaterials && (
+        {!isPreview && (
           <ContactShadows
-            position={[0, 0.07, 0]}
-            opacity={0.2}
+            position={[0, STUDIO_PAD_TOP + 0.002, 0]}
+            opacity={0.42}
             scale={14}
-            blur={2.8}
-            far={6.5}
-            color="#2a2a2e"
-            resolution={256}
+            blur={1.4}
+            far={5.5}
+            color="#1c1c20"
+            resolution={512}
             frames={1}
           />
         )}
@@ -154,7 +181,6 @@ function WorkshopScene({
 
 export function WorkshopCanvas(props: WorkshopCanvasProps) {
   const [epoch, setEpoch] = useState(0);
-  const [liteMaterials, setLiteMaterials] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const lostCount = useRef(0);
 
@@ -164,7 +190,6 @@ export function WorkshopCanvas(props: WorkshopCanvasProps) {
       setGaveUp(true);
       return;
     }
-    setLiteMaterials(true);
     window.setTimeout(() => setEpoch((current) => current + 1), 280);
   }, []);
 
@@ -186,7 +211,6 @@ export function WorkshopCanvas(props: WorkshopCanvasProps) {
           onClick={() => {
             lostCount.current = 0;
             setGaveUp(false);
-            setLiteMaterials(true);
             setEpoch((current) => current + 1);
           }}
         >
@@ -200,7 +224,6 @@ export function WorkshopCanvas(props: WorkshopCanvasProps) {
     <WorkshopScene
       key={epoch}
       {...props}
-      liteMaterials={liteMaterials}
       onContextLost={handleContextLost}
     />
   );

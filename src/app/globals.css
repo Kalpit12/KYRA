@@ -16,6 +16,8 @@
   --kyra-silver: #8a8a8e;
   --kyra-platinum: #e5e4e2;
   --kyra-gold: #d4af37;
+  --btn-primary-fg: #ffffff;
+  --hero-glow: rgba(226, 19, 31, 0.12);
   --glass: rgba(0, 0, 0, 0.03);
   --glass-border: rgba(0, 0, 0, 0.08);
   --shadow-premium: 0 24px 80px rgba(0, 0, 0, 0.08);
@@ -46,6 +48,8 @@
   --font-display: var(--font-barlow);
   --font-hero: var(--font-syne);
   --font-mono: var(--font-plex);
+  --font-wordmark: var(--font-outfit);
+  --font-customs: var(--font-saira);
 }
 
 * {
@@ -111,6 +115,30 @@ h4 {
   line-height: 0.95;
 }
 
+.font-wordmark {
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+.font-customs-mark {
+  font-family: var(--font-saira), var(--font-barlow), sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 0.95;
+}
+
+.kyra-lockup-tagline {
+  font-family: var(--font-outfit), sans-serif;
+  font-weight: 500;
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+}
+
 .font-mono {
   font-family: var(--font-plex), ui-monospace, monospace;
   letter-spacing: 0.06em;
@@ -170,8 +198,44 @@ h4 {
 @media (prefers-reduced-motion: reduce) {
   .text-flow-red {
     animation: none;
-    background: linear-gradient(90deg, var(--kyra-red-dark), var(--kyra-red));
+    background-image: linear-gradient(90deg, var(--kyra-red-dark), var(--kyra-red));
     background-size: 100% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+}
+
+.text-flow-silver {
+  background-image: linear-gradient(
+    90deg,
+    #6e6a6b 0%,
+    #6e6a6b 32%,
+    #8d898a 40%,
+    #b1adae 46%,
+    #d8d4d4 49%,
+    #ece9e9 50%,
+    #d8d4d4 51%,
+    #b1adae 54%,
+    #8d898a 60%,
+    #6e6a6b 68%,
+    #6e6a6b 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: hero-red-flow 5.5s linear infinite;
+  will-change: background-position;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-flow-silver {
+    animation: none;
+    background-image: linear-gradient(90deg, #6e6a6b, #ece9e9);
+    background-size: 100% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
   }
 }
 
@@ -572,6 +636,136 @@ body:has(section[data-nav-theme="dark"]) header:not(.nav-scrolled) .nav-burger-b
 
 .nav-over-hero .kyra-brand-logo-wrap {
   background: rgb(0 0 0 / 0.7);
+}
+
+/*
+  KYRA Customs logo: black field + dusty rose-gold / pale pink metal
+  (#0b0b0c, #dca6ae, #9f747b, #5e3d43, #eae6de). Scoped to /customs.
+*/
+body:has([data-customs-theme]) {
+  --kyra-red: #dca6ae;
+  --kyra-red-dark: #5e3d43;
+  --kyra-red-hover: #e8c4c9;
+  --kyra-red-glow: rgba(220, 166, 174, 0.28);
+  --btn-primary-fg: #0b0b0c;
+  --background: #0b0b0c;
+  --foreground: #f3ecee;
+  --muted: #141314;
+  --muted-foreground: #b5a8ab;
+  --border: #2a2425;
+  --panel: #161415;
+  --kyra-steel: #9d9194;
+  --glass: rgba(220, 166, 174, 0.06);
+  --glass-border: rgba(220, 166, 174, 0.16);
+}
+
+body:has([data-customs-theme]) header .nav-link-theme {
+  color: rgb(243 236 238 / 0.7);
+}
+
+body:has([data-customs-theme]) header .nav-link-theme:hover {
+  color: #f3ecee;
+}
+
+body:has([data-customs-theme]) header .nav-burger-bar {
+  background-color: #f3ecee;
+}
+
+body:has([data-customs-theme]) .kyra-brand-logo-wrap {
+  background: #000000;
+}
+
+body:has([data-customs-theme]) .kyra-brand-logo-wrap img {
+  mix-blend-mode: normal;
+  filter: brightness(1.06) contrast(1.04);
+}
+
+/* 3D workshop stays a light studio; keep the rose accent. */
+[data-workshop-light] {
+  --background: #ececee;
+  --foreground: #121214;
+  --muted: #e4e4e7;
+  --muted-foreground: #5c5c63;
+  --border: #d4d4d8;
+  --panel: #e7e7ea;
+  --kyra-steel: #6b6b70;
+  --btn-primary-fg: #0b0b0c;
+  --glass: rgba(0, 0, 0, 0.03);
+  --glass-border: rgba(0, 0, 0, 0.08);
+}
+
+/*
+  KYRA Premium Wash logo: black field + white / cool silver
+  (#020101, #ece9e9, #b1adae). No rose. Scoped to /wash.
+*/
+body:has([data-wash-theme]) {
+  --kyra-red: #ece9e9;
+  --kyra-red-dark: #6e6a6b;
+  --kyra-red-hover: #ffffff;
+  --kyra-red-glow: rgba(236, 233, 233, 0.22);
+  --btn-primary-fg: #020101;
+  --hero-glow: rgba(177, 173, 174, 0.16);
+  --background: #020101;
+  --foreground: #ece9e9;
+  --muted: #121111;
+  --muted-foreground: #b1adae;
+  --border: #2a2929;
+  --panel: #161515;
+  --kyra-steel: #b1adae;
+  --kyra-platinum: #ece9e9;
+  --glass: rgba(236, 233, 233, 0.05);
+  --glass-border: rgba(177, 173, 174, 0.18);
+}
+
+body:has([data-wash-theme]) header .nav-link-theme {
+  color: rgb(236 233 233 / 0.7);
+}
+
+body:has([data-wash-theme]) header .nav-link-theme:hover {
+  color: #ece9e9;
+}
+
+body:has([data-wash-theme]) header .nav-burger-bar {
+  background-color: #ece9e9;
+}
+
+body:has([data-wash-theme]) .kyra-brand-logo-wrap {
+  background: #000000;
+}
+
+body:has([data-wash-theme]) .kyra-brand-logo-wrap img {
+  mix-blend-mode: normal;
+  filter: brightness(1.06) contrast(1.04);
+}
+
+body:has([data-wash-theme]) .text-flow-red {
+  background-image: linear-gradient(
+    90deg,
+    #6e6a6b 0%,
+    #6e6a6b 32%,
+    #8d898a 40%,
+    #b1adae 46%,
+    #d8d4d4 49%,
+    #ece9e9 50%,
+    #d8d4d4 51%,
+    #b1adae 54%,
+    #8d898a 60%,
+    #6e6a6b 68%,
+    #6e6a6b 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has([data-wash-theme]) .text-flow-red {
+    background-image: linear-gradient(90deg, #6e6a6b, #ece9e9);
+    background-size: 100% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
 }
 
 

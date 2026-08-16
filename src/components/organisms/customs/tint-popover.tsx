@@ -42,7 +42,7 @@ export function TintPopover({ tintId, onTintChange, onClose }: TintPopoverProps)
             className={cn(
               "border px-2.5 py-1 font-mono text-[10px] tracking-[0.06em] uppercase transition sm:text-xs",
               tintId === film.id
-                ? "border-kyra-red bg-kyra-red text-white"
+                ? "border-kyra-red bg-kyra-red text-[color:var(--btn-primary-fg)]"
                 : "border-white/15 text-white/60 hover:border-kyra-red hover:text-white"
             )}
           >

@@ -42,10 +42,42 @@ const heights = {
 } as const;
 
 const wordmarkSizes = {
-  sm: "text-[1.75rem] leading-none",
+  sm: "text-[1.55rem] leading-none sm:text-[1.7rem]",
   md: "text-3xl leading-none",
   lg: "text-[clamp(2.5rem,8vw,4.25rem)] leading-none",
 } as const;
+
+/** Geometric barless A from the Platinum Imports / Wash marks. */
+function KyraBarlessA({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 72 80"
+      className={cn(
+        "inline-block h-[1cap] w-[0.9cap] shrink-0 overflow-visible align-baseline",
+        className
+      )}
+      aria-hidden
+      focusable="false"
+    >
+      <path fill="currentColor" d="M36 0 72 80H56.4L36 30.8 15.6 80H0Z" />
+    </svg>
+  );
+}
+
+function KyraLetters({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn("inline-flex items-baseline leading-none", className)}
+      style={{ gap: "0.12em" }}
+      aria-hidden
+    >
+      <span>K</span>
+      <span>Y</span>
+      <span>R</span>
+      <KyraBarlessA />
+    </span>
+  );
+}
 
 export function KyraWordmark({
   size = "sm",
@@ -58,18 +90,19 @@ export function KyraWordmark({
   const mark = (
     <span className={cn("inline-flex flex-col whitespace-nowrap", className)}>
       <span
+        aria-label="KYRA"
         className={cn(
-          "kyra-brand-wordmark-main font-hero font-extrabold tracking-[-0.045em] whitespace-nowrap",
+          "kyra-brand-wordmark-main font-wordmark whitespace-nowrap",
           inverted ? "text-white" : "text-foreground",
           wordmarkSizes[size]
         )}
       >
-        KYR<span className="text-kyra-red">Λ</span>
+        <KyraLetters />
       </span>
       {showTagline && (
         <small
           className={cn(
-            "kyra-brand-tagline mt-1 font-mono text-[9px] tracking-[0.22em] uppercase whitespace-nowrap",
+            "kyra-brand-tagline kyra-lockup-tagline mt-1.5 text-[8px] whitespace-nowrap sm:text-[9px]",
             inverted ? "text-white/55" : "text-kyra-steel"
           )}
         >
@@ -83,7 +116,7 @@ export function KyraWordmark({
     return (
       <Link
         href={href}
-        className="group inline-flex shrink-0 transition-colors hover:[&>span>span:first-child]:text-kyra-red"
+        className="group inline-flex shrink-0 transition-colors hover:[&_.kyra-brand-wordmark-main]:text-kyra-red"
       >
         {mark}
       </Link>
@@ -201,9 +234,9 @@ interface KyraCustomsBrandProps {
 }
 
 const customsWordmarkSizes = {
-  sm: "text-[1.05rem] leading-none sm:text-[1.2rem]",
-  md: "text-xl leading-none",
-  lg: "text-2xl leading-none",
+  sm: "text-[1.35rem] leading-none sm:text-[1.55rem]",
+  md: "text-[1.75rem] leading-none",
+  lg: "text-[2.15rem] leading-none",
 } as const;
 
 /** Header lockup for /customs — mark + KYRA CUSTOMS + tagline */
@@ -234,14 +267,14 @@ export function KyraCustomsBrand({
       <span className="inline-flex shrink-0 flex-col whitespace-nowrap">
         <span
           className={cn(
-            "font-hero font-extrabold tracking-[-0.03em] text-foreground uppercase whitespace-nowrap",
+            "font-customs-mark text-foreground whitespace-nowrap",
             customsWordmarkSizes[size]
           )}
         >
-          Kyra <span className="text-kyra-red">Customs</span>
+          KYRA <span className="text-kyra-red">CUSTOMS</span>
         </span>
         {showTagline && (
-          <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
+          <small className="kyra-lockup-tagline mt-1.5 text-[8px] text-kyra-steel whitespace-nowrap sm:text-[9px]">
             {tagline}
           </small>
         )}
@@ -270,9 +303,9 @@ interface KyraWashBrandProps {
 }
 
 const washWordmarkSizes = {
-  sm: "text-[0.95rem] leading-none sm:text-[1.1rem]",
-  md: "text-xl leading-none",
-  lg: "text-2xl leading-none",
+  sm: "text-[1.35rem] leading-none sm:text-[1.5rem]",
+  md: "text-2xl leading-none",
+  lg: "text-3xl leading-none",
 } as const;
 
 /** Header lockup for /wash — mark + Kyra Premium Wash + tagline */
@@ -302,15 +335,19 @@ export function KyraWashBrand({
       </span>
       <span className="inline-flex shrink-0 flex-col whitespace-nowrap">
         <span
+          aria-label="KYRA"
           className={cn(
-            "font-hero font-extrabold tracking-[-0.03em] text-foreground uppercase whitespace-nowrap",
+            "font-wordmark text-foreground whitespace-nowrap",
             washWordmarkSizes[size]
           )}
         >
-          Kyra <span className="text-kyra-red">Premium Wash</span>
+          <KyraLetters />
+        </span>
+        <span className="kyra-lockup-tagline mt-1 text-[7.5px] text-kyra-steel whitespace-nowrap sm:text-[8.5px]">
+          Premium Wash
         </span>
         {showTagline && (
-          <small className="mt-1 font-mono text-[9px] tracking-[0.22em] text-kyra-steel uppercase whitespace-nowrap">
+          <small className="kyra-lockup-tagline mt-1 text-[8px] text-kyra-steel whitespace-nowrap sm:text-[9px]">
             {tagline}
           </small>
         )}

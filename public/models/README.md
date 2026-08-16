@@ -12,7 +12,9 @@ Settings → Git, then redeploy.
 
 | File | Source | Used for |
 |------|--------|----------|
-| `86ql3dghcf0.glb` | Hum3D Porsche 911 Carrera 4S (`86ql3dghcf0.blend`) | Sedan, Coupe |
+| `t7iquki8rj.glb` | BMW M3 Competition G80 (`t7iquki8rj.blend`) | Sedan |
+| `audi-a7-sedan.glb` | CGTrader Audi A7 Sportback OBJ | Legacy sedan export |
+| `86ql3dghcf0.glb` | Hum3D Porsche 911 Carrera 4S (`86ql3dghcf0.blend`) | Coupe |
 | `cs6hv1t8ckpbo.glb` | Discovery-style SUV (`cs6hv1t8ckpbo.blend`) | SUV, Mini SUV |
 | `gqbnkbwsmehl.glb` | Studio vehicle (`gqbnkbwsmehl.blend`) | Pickup, Hatchback |
 | `toy-car.glb` | [Khronos ToyCar](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ToyCar) | Fallback / legacy |

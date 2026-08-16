@@ -26,7 +26,7 @@ function makeTexture(
 }
 
 /** Classic 2×2 twill carbon weave with readable fiber contrast + normals */
-function buildTwill(size = 512): CarbonTextures {
+function buildTwill(size = 1024): CarbonTextures {
   const albedo = document.createElement("canvas");
   albedo.width = size;
   albedo.height = size;
@@ -162,7 +162,7 @@ function buildTwill(size = 512): CarbonTextures {
 }
 
 /** Chaotic forged-carbon flecks */
-function buildForged(size = 512): CarbonTextures {
+function buildForged(size = 1024): CarbonTextures {
   const albedo = document.createElement("canvas");
   albedo.width = size;
   albedo.height = size;
