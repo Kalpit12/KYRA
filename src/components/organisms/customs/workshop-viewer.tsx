@@ -37,7 +37,7 @@ const WorkshopCanvas = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-full items-center justify-center bg-[#ececee]">
+      <div className="flex h-full items-center justify-center bg-[#0c0d10]">
         <KyraLoader size="lg" label="Preparing studio" />
       </div>
     ),
@@ -144,7 +144,7 @@ export function WorkshopViewer({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] bg-[#ececee]"
+      className="fixed inset-0 z-[100] bg-[#0c0d10]"
       data-workshop-light
     >
       <div className="absolute inset-0">
@@ -161,6 +161,7 @@ export function WorkshopViewer({
             <WorkshopCanvas
               modelPath={modelUrl}
               modelScale={vehicleType.modelScale}
+              vehicleTypeId={vehicleTypeId}
               wrap={wrap}
               finish={finish}
               tint={tint}
@@ -170,6 +171,15 @@ export function WorkshopViewer({
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-20">
+        <div className="pointer-events-none absolute top-5 left-1/2 hidden -translate-x-1/2 text-center sm:block">
+          <p className="font-display text-lg font-semibold tracking-[0.18em] text-white uppercase">
+            Kyra <span className="text-kyra-red">Customs</span>
+          </p>
+          <p className="mt-1 font-mono text-[9px] tracking-[0.28em] text-white/45 uppercase">
+            Showroom
+          </p>
+        </div>
+
         <div className="pointer-events-auto absolute top-4 left-4 sm:top-6 sm:left-6">
           <button
             type="button"
@@ -263,17 +273,17 @@ export function WorkshopViewer({
                   type="button"
                   onClick={() => togglePanel(item.id)}
                   className={cn(
-                    "flex min-h-[72px] flex-col items-center justify-center gap-1 border px-2 py-3 text-white backdrop-blur-md transition sm:min-h-[80px] sm:px-3",
+                    "flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-2xl border px-2 py-3 backdrop-blur-xl transition sm:min-h-[80px] sm:px-3",
                     active
-                      ? "border-kyra-red bg-black/75"
-                      : "border-white/12 bg-black/55 hover:border-white/30"
+                      ? "rounded-2xl border-white bg-white text-black shadow-lg"
+                      : "rounded-2xl border-white/10 bg-black/40 text-white hover:bg-white/10"
                   )}
                 >
-                  <item.icon size={18} className={active ? "text-kyra-red" : "text-white/80"} />
+                  <item.icon size={18} className={active ? "text-black" : "text-white/80"} />
                   <span className="font-mono text-[10px] tracking-[0.14em] uppercase">
                     {item.label}
                   </span>
-                  <span className="max-w-full truncate font-mono text-[9px] tracking-[0.06em] text-white/55 uppercase">
+                  <span className={`max-w-full truncate font-mono text-[9px] tracking-[0.06em] uppercase ${active ? "text-black/55" : "text-white/55"}`}>
                     {item.detail}
                   </span>
                 </button>

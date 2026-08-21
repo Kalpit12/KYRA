@@ -12,11 +12,15 @@ Settings → Git, then redeploy.
 
 | File | Source | Used for |
 |------|--------|----------|
-| `t7iquki8rj.glb` | BMW M3 Competition G80 (`t7iquki8rj.blend`) | Sedan |
+| `lexus_is350_f_sport.glb` | Lexus IS 350 F Sport (copied as-is, no recompress) | Sedan |
+| `porsche-911-carrera.glb` | Sketchfab Porsche 911 Carrera (`911 Carrera/source/*.blend`) | Legacy sedan |
+| `t7iquki8rj.glb` | BMW M3 Competition G80 (`t7iquki8rj.blend`) | Legacy sedan |
 | `audi-a7-sedan.glb` | CGTrader Audi A7 Sportback OBJ | Legacy sedan export |
 | `86ql3dghcf0.glb` | Hum3D Porsche 911 Carrera 4S (`86ql3dghcf0.blend`) | Coupe |
-| `cs6hv1t8ckpbo.glb` | Discovery-style SUV (`cs6hv1t8ckpbo.blend`) | SUV, Mini SUV |
-| `gqbnkbwsmehl.glb` | Studio vehicle (`gqbnkbwsmehl.blend`) | Pickup, Hatchback |
+| `cs6hv1t8ckpbo.glb` | Discovery-style SUV (`cs6hv1t8ckpbo.blend`) | Legacy SUV, Mini SUV |
+| `2022_toyota_land_cruiser_300_vx.r.glb` | Sketchfab 2022 Toyota Land Cruiser 300 VX.R (copied as-is, no recompress) | SUV |
+| `gqbnkbwsmehl.glb` | Studio vehicle (`gqbnkbwsmehl.blend`) | Pickup |
+| `2025_volkswagen_golf_r.glb` | Sketchfab 2025 Volkswagen Golf R (copied as-is, no recompress) | Hatchback |
 | `toy-car.glb` | [Khronos ToyCar](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ToyCar) | Fallback / legacy |
 | `car-concept.glb` | [Khronos CarConcept](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept) | Fallback / legacy |
 

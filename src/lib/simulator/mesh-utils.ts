@@ -12,6 +12,9 @@ const BODY_MATERIAL_HINTS = [
   "body paint",
   "bodypaint",
   "toycar",
+  "paint",
+  // Sketchfab Lexus IS etc. — paint slot is named "body"
+  "body",
 ];
 
 /** Cabin window glass only — receives window tint (Phantom excludes headlights/taillights) */
@@ -36,6 +39,10 @@ const LENS_GLASS_HINTS = [
   "glass_light",
   "red glass",
   "redglass",
+  "r glass",
+  "r_glass",
+  "o glass",
+  "o_glass",
   "clear glass",
   "clearglass",
   "lamp cover",
@@ -59,6 +66,10 @@ const LAMP_MESH_HINTS = [
   "lamp cover",
   "light cover",
   "frontlight",
+  "sm light",
+  "sk light",
+  "light f",
+  "light b",
 ];
 
 /** Generic "glass" token — treated as window unless also a lens/light */
@@ -109,7 +120,38 @@ const EXCLUDE_HINTS = [
   "chrome",
   "headlight",
   "taillight",
+  "exhaust",
+  "atlas",
+  "grille",
+  "badge",
+  "stripe",
+  "caliper",
+  "rotor",
+  "diffuser",
+  "reflector",
+  "speaker",
+  "sunroof",
 ];
+
+/** Shared trim atlases / non-paint shaders (Sketchfab, game-ready cars) */
+const TRIM_MATERIAL_HINTS = [
+  "atlas",
+  "exhaust",
+  "grille",
+  "badge",
+  "stripe",
+  "caliper",
+  "rotor",
+  "reflector",
+  "speaker",
+  "leather",
+  "carpet",
+  "fabric",
+  "plastic",
+  "rubber",
+];
+
+const INTERIOR_NAME_HINTS = ["int ", "interior"];
 
 const BODY_MESH_HINTS = [
   "body",
@@ -169,8 +211,44 @@ export function isBrakeMaterial(material: THREE.Material): boolean {
 
 export function isLensGlassMaterial(material: THREE.Material): boolean {
   const name = material.name || "";
-  if (!name) return false;
-  return matchesHints(name, LENS_GLASS_HINTS);
+  if (name && matchesHints(name, LENS_GLASS_HINTS)) return true;
+  const physical = material as THREE.MeshPhysicalMaterial;
+  const transmission = physical.transmission ?? 0;
+  if (transmission < 0.08) return false;
+  const color = physical.color;
+  if (!color) return false;
+  // Red tail covers (Maya phong1, Sketchfab red_glass)
+  return color.r > 0.28 && color.g < 0.18 && color.b < 0.18;
+}
+
+export function isLampHousingMesh(mesh: THREE.Mesh): boolean {
+  const name = `${mesh.name} ${mesh.parent?.name ?? ""}`;
+  if (matchesHints(name, LAMP_MESH_HINTS)) return true;
+  const compact = compactName(name);
+  return compact.includes("smlight") || compact.includes("sklight");
+}
+
+/** Real exhaust systems — not Toyota TMI materials baked into door node names. */
+export function isExhaustMesh(mesh: THREE.Mesh): boolean {
+  const compact = compactName(`${mesh.name} ${mesh.parent?.name ?? ""}`);
+  return (
+    compact.includes("exhaustsystem") ||
+    compact.includes("extbodyexhaust") ||
+    compact.includes("skexhaust") ||
+    compact.includes("exhausttip") ||
+    compact.includes("muffler")
+  );
+}
+
+function createBlackExhaustMaterial() {
+  return new THREE.MeshPhysicalMaterial({
+    name: "ExhaustBlack",
+    color: new THREE.Color("#1a1b1d"),
+    metalness: 0.28,
+    roughness: 0.48,
+    envMapIntensity: 0.22,
+    side: THREE.DoubleSide,
+  });
 }
 
 export function isWindowGlassMaterial(material: THREE.Material): boolean {
@@ -284,11 +362,34 @@ export function isGlassMaterial(material: THREE.Material): boolean {
 
 export function isBodyMaterial(material: THREE.Material): boolean {
   const name = material.name || "";
-  if (!name) return false;
-  if (matchesHints(name, EXCLUDE_HINTS)) return false;
+  if (name && matchesHints(name, EXCLUDE_HINTS)) return false;
   if (isGlassMaterial(material)) return false;
   if (isLightMaterial(material)) return false;
-  return matchesHints(name, BODY_MATERIAL_HINTS);
+  if (isTrimMaterial(material)) return false;
+  if (name && matchesHints(name, BODY_MATERIAL_HINTS)) return true;
+  return isUntexturedPaintMaterial(material);
+}
+
+/** Toyota/Sketchfab cars often hash paint (TMI_1350010001) instead of "CarPaint". */
+function isUntexturedPaintMaterial(material: THREE.Material): boolean {
+  const std = material as THREE.MeshPhysicalMaterial;
+  if (std.map) return false;
+  if ((std.transmission ?? 0) > 0.05) return false;
+  if (std.transparent && (std.opacity ?? 1) < 0.9) return false;
+  const roughness = std.roughness ?? 1;
+  const metalness = std.metalness ?? 1;
+  if (roughness > 0.2 || metalness > 0.32) return false;
+  const name = compactName(material.name || "");
+  if (
+    name.includes("cabin") ||
+    name.includes("leather") ||
+    name.includes("dash") ||
+    name.includes("rim") ||
+    name.includes("mirror")
+  ) {
+    return false;
+  }
+  return true;
 }
 
 export function isGlassMesh(mesh: THREE.Mesh): boolean {
@@ -309,22 +410,44 @@ export function isGlassMesh(mesh: THREE.Mesh): boolean {
   return materials.some((mat) => mat && isGlassMaterial(mat));
 }
 
+export function isTrimMaterial(material: THREE.Material): boolean {
+  return matchesHints(material.name || "", TRIM_MATERIAL_HINTS);
+}
+
+export function isInteriorMesh(mesh: THREE.Mesh): boolean {
+  const name = `${mesh.name} ${mesh.parent?.name ?? ""}`;
+  return matchesHints(name, INTERIOR_NAME_HINTS);
+}
+
+/** True when the GLB already tags paint (CarPaint / Car paint). Skip name guessing. */
+export function hasNamedBodyPaint(root: THREE.Object3D): boolean {
+  let found = false;
+  root.traverse((child) => {
+    if (found || !(child instanceof THREE.Mesh)) return;
+    const materials = Array.isArray(child.material) ? child.material : [child.material];
+    if (materials.some((mat) => mat && isBodyMaterial(mat))) found = true;
+  });
+  return found;
+}
+
 /**
  * True when this mesh should receive wrap color.
- * Prefer material names (Hum3D: "Car paint" / "CarPaint"). Do not treat all opaque meshes as body.
+ * Prefer material names (Hum3D / Sketchfab: "Car paint" / "CarPaint").
+ * Mesh-name fallback is last resort — "body" in Ext_Body_Exhaust is trim, not paint.
  */
 export function isBodyMesh(mesh: THREE.Mesh): boolean {
   const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
   if (materials.some((mat) => mat && isBodyMaterial(mat))) return true;
 
-  const meshName = mesh.name || mesh.parent?.name || "";
+  const meshName = `${mesh.name} ${mesh.parent?.name ?? ""}`;
+  if (isInteriorMesh(mesh)) return false;
   if (matchesHints(meshName, EXCLUDE_HINTS)) return false;
+  if (materials.some((mat) => mat && (isTrimMaterial(mat) || matchesHints(mat.name || "", EXCLUDE_HINTS)))) {
+    return false;
+  }
   if (isGlassMesh(mesh)) return false;
 
   if (matchesHints(meshName, BODY_MESH_HINTS)) {
-    if (materials.some((mat) => mat && matchesHints(mat.name || "", EXCLUDE_HINTS))) {
-      return false;
-    }
     return true;
   }
 
@@ -388,6 +511,13 @@ export function sanitizeWorkshopModel(root: THREE.Object3D) {
   root.traverse((child) => {
     if (!(child instanceof THREE.Mesh)) return;
 
+    if (isExhaustMesh(child)) {
+      child.visible = true;
+      child.material = createBlackExhaustMaterial();
+      child.castShadow = true;
+      return;
+    }
+
     const geometry = child.geometry;
     if (geometry) {
       if (!geometry.boundingBox) geometry.computeBoundingBox();
@@ -418,20 +548,45 @@ export function sanitizeWorkshopModel(root: THREE.Object3D) {
 
     for (const mat of sourceMats) {
       if (!mat) continue;
-      mat.side = THREE.FrontSide;
 
       const name = compactName(mat.name || child.name || "");
+      const factoryLensOrTrim =
+        isTrimMaterial(mat) ||
+        isLensGlassMaterial(mat) ||
+        isWindowGlassMaterial(mat) ||
+        isLampHousingMesh(child) ||
+        name === "atlas" ||
+        name === "glow" ||
+        name === "redglow" ||
+        name.includes("exhaust");
+
+      // Atlas/exhaust/lenses are authored double-sided. Front-only hides the
+      // black exhaust shell and leaves the inner honeycomb looking white.
+      if (!factoryLensOrTrim) {
+        mat.side = THREE.FrontSide;
+      }
+
       if (
         isBodyMaterial(mat) ||
         name.startsWith("windowtint") ||
         name === "glasswhite" ||
-        name === "glassred"
+        name === "glassred" ||
+        isLensGlassMaterial(mat)
       ) {
         continue;
       }
 
       const std = mat as THREE.MeshStandardMaterial;
-      if (isLightMaterial(mat) || name === "light") {
+      const factoryEmitter =
+        name === "glow" ||
+        name === "redglow" ||
+        name === "light" ||
+        name.includes("tmilight") ||
+        name.includes("glasslight") ||
+        compactName(child.name).includes("smlight") ||
+        compactName(child.name).includes("extlight") ||
+        compactName(child.name).includes("drl");
+      if (!factoryEmitter && (isLightMaterial(mat) || name === "light")) {
         if (std.emissive) {
           std.emissiveIntensity = Math.min(std.emissiveIntensity || 1, 0.32);
         }

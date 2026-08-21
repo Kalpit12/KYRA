@@ -98,13 +98,13 @@ async function buildLockupTexture(): Promise<THREE.Texture | null> {
 
   ctx.textBaseline = "alphabetic";
   ctx.font = `800 ${titleSize}px ${syne}, sans-serif`;
-  ctx.fillStyle = "#121214";
+  ctx.fillStyle = "#f3f3f6";
   ctx.fillText("Kyra ", textX, titleY);
   ctx.fillStyle = "#e2131f";
   ctx.fillText("Customs", textX + kyraWidth, titleY);
 
   ctx.font = `500 ${tagSize}px ${plex}, monospace`;
-  ctx.fillStyle = "#6b6b70";
+  ctx.fillStyle = "#9a9aa3";
   drawTracked(ctx, "DIVINE ELEGANCE", textX, tagY, 7);
 
   const texture = new THREE.CanvasTexture(canvas);

@@ -13,11 +13,16 @@ import {
 } from "@react-three/drei";
 import * as THREE from "three";
 import { CarModel } from "@/components/organisms/customs/three/car-model";
-import { StudioEnvironment, STUDIO_PAD_TOP } from "@/components/organisms/customs/three/studio-environment";
+import { StudioEnvironment } from "@/components/organisms/customs/three/studio-environment";
 import { StudioLights } from "@/components/organisms/customs/three/studio-lights";
 import { silenceThreeClockDeprecation } from "@/lib/three/silence-clock-deprecation";
 import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
-import type { WrapFinishId, WrapOption, WindowFilm } from "@/lib/data/simulator";
+import type {
+  VehicleTypeId,
+  WrapFinishId,
+  WrapOption,
+  WindowFilm,
+} from "@/lib/data/simulator";
 
 silenceThreeClockDeprecation();
 useGLTF.setDecoderPath(DRACO_DECODER_PATH);
@@ -27,10 +32,10 @@ export type WorkshopPerformanceMode = "full" | "preview";
 interface WorkshopCanvasProps {
   modelPath: string;
   modelScale?: number;
+  vehicleTypeId?: VehicleTypeId;
   wrap: WrapOption;
   finish: WrapFinishId;
   tint: WindowFilm;
-  /** Hero teaser uses preview — no shadows / HDR, lower DPR */
   performanceMode?: WorkshopPerformanceMode;
 }
 
@@ -59,11 +64,7 @@ function ContextLostGuard({ onLost }: { onLost: () => void }) {
   return null;
 }
 
-function RenderWhenPropsChange({
-  token,
-}: {
-  token: string;
-}) {
+function RenderWhenPropsChange({ token }: { token: string }) {
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => {
     invalidate();
@@ -71,23 +72,19 @@ function RenderWhenPropsChange({
   return null;
 }
 
-function StudioControls({
-  isPreview,
-}: {
-  isPreview: boolean;
-}) {
+function StudioControls({ isPreview }: { isPreview: boolean }) {
   const invalidate = useThree((state) => state.invalidate);
 
   return (
     <OrbitControls
-      target={[0, 0.72, 0]}
+      target={[0, 0.92, -0.55]}
       enablePan={false}
       enableZoom={!isPreview}
       autoRotate={false}
-      minDistance={3.1}
-      maxDistance={8.5}
-      minPolarAngle={Math.PI / 5.5}
-      maxPolarAngle={Math.PI / 2.12}
+      minDistance={3.6}
+      maxDistance={12.5}
+      minPolarAngle={Math.PI / 6}
+      maxPolarAngle={Math.PI / 2 - 0.04}
       enableDamping
       dampingFactor={0.08}
       onChange={() => invalidate()}
@@ -99,6 +96,7 @@ function StudioControls({
 function WorkshopScene({
   modelPath,
   modelScale,
+  vehicleTypeId,
   wrap,
   finish,
   tint,
@@ -110,67 +108,68 @@ function WorkshopScene({
   return (
     <Canvas
       shadows={!isPreview}
-      dpr={isPreview ? 1 : [1, 1.5]}
+      dpr={isPreview ? 1 : [1.25, 2]}
       frameloop="demand"
+      performance={{ min: 0.7 }}
       gl={{
         antialias: true,
         alpha: false,
         powerPreference: "high-performance",
         toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 0.94,
         stencil: false,
         depth: true,
         failIfMajorPerformanceCaveat: false,
-        preserveDrawingBuffer: false,
+        preserveDrawingBuffer: true,
       }}
       onCreated={({ gl }) => {
-        gl.toneMappingExposure = isPreview ? 1.06 : 1.08;
+        gl.toneMappingExposure = 0.94;
         gl.outputColorSpace = THREE.SRGBColorSpace;
         gl.shadowMap.enabled = !isPreview;
-        gl.shadowMap.type = THREE.PCFShadowMap;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
       }}
       className="h-full w-full"
     >
       <AdaptiveDpr pixelated={false} />
       <RenderWhenPropsChange
-        token={`${modelPath}:${wrap.id}:${finish}:${tint.id}:${modelScale ?? 1}`}
+        token={`${modelPath}:${vehicleTypeId ?? ""}:${wrap.id}:${finish}:${tint.id}:${modelScale ?? 1}`}
       />
       <ContextLostGuard onLost={onContextLost} />
-      <color attach="background" args={["#ececee"]} />
+      <color attach="background" args={["#0c0d10"]} />
 
       <PerspectiveCamera
         makeDefault
-        position={isPreview ? [3.4, 1.35, 4.4] : [3.55, 1.28, 4.85]}
-        fov={isPreview ? 40 : 34}
+        position={isPreview ? [3.4, 1.35, 4.4] : [4.85, 1.62, 7.15]}
+        fov={38}
       />
       <StudioControls isPreview={isPreview} />
 
       <Suspense
         fallback={
-          <LoadingFallback label={isPreview ? "Loading preview" : "Loading studio"} />
+          <LoadingFallback label={isPreview ? "Loading preview" : "Loading workshop"} />
         }
       >
         <StudioLights preview={isPreview} />
         <StudioEnvironment receiveShadow={!isPreview} />
-        <group position={[0, STUDIO_PAD_TOP + 0.004, 0]}>
-          <CarModel
-            modelPath={modelPath}
-            modelScale={modelScale}
-            wrap={wrap}
-            finish={finish}
-            tint={tint}
-            enableShadows={!isPreview}
-            liteMaterials={isPreview}
-          />
-        </group>
+        <CarModel
+          modelPath={modelPath}
+          modelScale={modelScale}
+          vehicleTypeId={vehicleTypeId}
+          wrap={wrap}
+          finish={finish}
+          tint={tint}
+          enableShadows={!isPreview}
+          liteMaterials={isPreview}
+        />
         {!isPreview && (
           <ContactShadows
-            position={[0, STUDIO_PAD_TOP + 0.002, 0]}
-            opacity={0.42}
-            scale={14}
-            blur={1.4}
-            far={5.5}
-            color="#1c1c20"
-            resolution={512}
+            position={[0, 0.008, -0.55]}
+            opacity={0.62}
+            scale={16}
+            blur={1.85}
+            far={10}
+            color="#000000"
+            resolution={1024}
             frames={1}
           />
         )}
@@ -195,19 +194,19 @@ export function WorkshopCanvas(props: WorkshopCanvasProps) {
 
   if (gaveUp) {
     return (
-      <div className="flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-3 bg-[#ececee] px-6 text-center">
+      <div className="flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-3 bg-[#0c0d10] px-6 text-center">
         <p className="font-mono text-[10px] tracking-[0.16em] text-kyra-red uppercase">
           Studio preview
         </p>
         <p className="font-display text-xl italic uppercase text-foreground">
           3D model unavailable
         </p>
-        <p className="max-w-sm text-sm text-foreground/70">
+        <p className="max-w-sm text-sm text-white/70">
           This browser lost its WebGL context. Close other GPU-heavy tabs and retry.
         </p>
         <button
           type="button"
-          className="mt-2 border border-border px-4 py-2 font-mono text-[10px] tracking-[0.14em] uppercase text-foreground transition hover:border-kyra-red"
+          className="mt-2 border border-white/15 px-4 py-2 font-mono text-[10px] tracking-[0.14em] uppercase text-white transition hover:border-kyra-red"
           onClick={() => {
             lostCount.current = 0;
             setGaveUp(false);
