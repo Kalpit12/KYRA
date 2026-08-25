@@ -1,17 +1,33 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { AnimatePresence } from "framer-motion";
+import { KyraLoader } from "@/components/atoms/kyra-loader";
 import { SimulatorWarmup } from "@/components/organisms/customs/simulator-warmup";
 import { SimulatorWelcome } from "@/components/organisms/customs/simulator-welcome";
 import { VehicleTypeGrid } from "@/components/organisms/customs/vehicle-type-grid";
-import { WorkshopViewer } from "@/components/organisms/customs/workshop-viewer";
 import {
   vehicleTypes,
   type SimulatorStep,
   type VehicleTypeId,
 } from "@/lib/data/simulator";
 import { warmDefaultSimulatorAssets } from "@/lib/simulator/preload";
+
+const WorkshopViewer = dynamic(
+  () =>
+    import("@/components/organisms/customs/workshop-viewer").then(
+      (mod) => mod.WorkshopViewer
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0c0d10]">
+        <KyraLoader size="lg" label="Preparing studio" />
+      </div>
+    ),
+  }
+);
 
 export function WrapSimulator() {
   const [step, setStep] = useState<SimulatorStep>(0);

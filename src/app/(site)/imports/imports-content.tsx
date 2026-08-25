@@ -164,6 +164,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
         subtitle="Curated luxury vehicles, hand-selected and imported with full documentation and a complete import dossier."
         showChevrons
         showShard={false}
+        overlay={false}
         backgroundVideo="/video/urus-imports-hero.mp4"
         backgroundImage="/video/posters/urus-imports-hero.jpg"
       />

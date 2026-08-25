@@ -87,6 +87,9 @@ export function VehicleTypeGrid({ vehicles, onSelect, onBack }: VehicleTypeGridP
             <h3 className="mt-6 font-display text-xl font-semibold italic uppercase text-foreground">
               {vehicle.name}
             </h3>
+            <p className="mt-1 font-mono text-[10px] tracking-[0.1em] text-kyra-red uppercase">
+              {vehicle.modelName}
+            </p>
             <p className="mt-2 text-sm text-kyra-steel">{vehicle.description}</p>
 
             <ul className="mt-4 space-y-1.5">

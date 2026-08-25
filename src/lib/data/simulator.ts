@@ -15,9 +15,10 @@ export type WrapCategoryId = "all" | "solid" | "shift" | "pearl" | "ppf" | "carb
 export interface VehicleType {
   id: VehicleTypeId;
   name: string;
+  /** Actual 3D model shown in the workshop — used in quotes and UI. */
+  modelName: string;
   description: string;
   features: string[];
-  vehicleId: string;
   modelPath: string;
   modelScale?: number;
 }
@@ -49,52 +50,52 @@ export const vehicleTypes: VehicleType[] = [
   {
     id: "sedan",
     name: "Sedan",
+    modelName: "Lexus IS 350 F Sport",
     description: "Lexus IS 350 F Sport — luxury performance sedan",
     features: ["F Sport stance", "Precision handling", "Executive cabin"],
-    vehicleId: "bmw-m4",
     modelPath: "/models/lexus_is350_f_sport.glb",
   },
   {
     id: "suv",
     name: "SUV",
+    modelName: "Toyota Land Cruiser 300",
     description: "Toyota Land Cruiser 300 — full-size luxury SUV",
     features: ["Commanding presence", "Off-road capability", "Executive cabin"],
-    vehicleId: "mercedes-g-wagon",
     modelPath: "/models/2022_toyota_land_cruiser_300_vx.r.glb",
   },
   {
     id: "mini-suv",
     name: "Mini SUV",
+    modelName: "Compact crossover",
     description: "Compact SUV with urban agility",
     features: ["City-friendly size", "Efficient performance", "Modern design"],
-    vehicleId: "toyota-prado",
     modelPath: "/models/iajrk0ag.glb",
     modelScale: 0.95,
   },
   {
     id: "pickup",
     name: "Pickup",
+    modelName: "Double-cab pickup",
     description: "Powerful double cabin utility truck",
     features: ["Double cabin", "Cargo capacity", "Off-road capability"],
-    vehicleId: "toyota-prado",
     modelPath: "/models/gqbnkbwsmehl.glb",
     modelScale: 1.05,
   },
   {
     id: "coupe",
     name: "Coupe",
+    modelName: "Performance coupe",
     description: "Athletic performance with striking design",
     features: ["Sport-tuned", "Aerodynamic", "Driver-focused"],
-    vehicleId: "bmw-m4",
     modelPath: "/models/7t9yfzn1bc.glb",
     modelScale: 0.92,
   },
   {
     id: "hatchback",
     name: "Hatchback",
+    modelName: "Volkswagen Golf R",
     description: "Volkswagen Golf R — hot-hatch performance",
     features: ["All-wheel drive", "Urban agility", "Track-ready stance"],
-    vehicleId: "toyota-prado",
     modelPath: "/models/2025_volkswagen_golf_r.glb",
   },
 ];
@@ -215,6 +216,7 @@ export const wrapCatalog: WrapOption[] = [
   { id: "3m-black-rose-pearl", name: "Black Rose Pearl", category: "pearl", colors: ["#4C3642"], brand: "3M", series: "2080" },
   { id: "avery-mystic-gold-pearl", name: "Mystic Gold Pearl", category: "pearl", colors: ["#B69A4E"], brand: "Avery", series: "SW900" },
   { id: "kpmf-lunar-cyan-pearl", name: "Lunar Cyan Pearl", category: "pearl", colors: ["#4E8FA8"], brand: "KPMF", series: "Pearl" },
+  /** colours[0] is UI swatch only — 3D keeps OEM paint and adds clearcoat */
   { id: "stek-clear-ppf", name: "Clear PPF", category: "ppf", colors: ["#DDE3EA"], brand: "STEK", series: "DYNOshield", ppfType: "clear" },
   { id: "xpel-smoke-ppf", name: "Smoke PPF", category: "ppf", colors: ["#2B3541"], brand: "XPEL", series: "ULTIMATE PLUS", ppfType: "tint" },
   { id: "ultrafit-blue-ppf", name: "Blue PPF", category: "ppf", colors: ["#4A90E2"], brand: "UltraFit", series: "Color PPF", ppfType: "tint" },
@@ -307,6 +309,15 @@ export function getWindowFilmById(id: string) {
   return windowFilms.find((f) => f.id === id) ?? windowFilms[0];
 }
 
+export function isClearPpf(wrap: WrapOption) {
+  return wrap.ppfType === "clear";
+}
+
+export function wrapColorLabel(wrap: WrapOption) {
+  if (isClearPpf(wrap)) return "OEM paint + clear film";
+  return wrap.colors.join(", ");
+}
+
 export function filterWraps(category: WrapCategoryId, finish: WrapFinishId) {
   return wrapCatalog.filter((wrap) => {
     if (category !== "all" && wrap.category !== category) return false;
@@ -328,7 +339,7 @@ export function buildQuoteSummary(
   wrap: WrapOption,
   tint: WindowFilm
 ) {
-  return `${vehicleType.name} · ${finish} · ${wrap.name} · ${tint.name}`;
+  return `${vehicleType.modelName} · ${finish} · ${wrap.name} · ${tint.name}`;
 }
 
 /** Structured inquiry body for admin dashboard (customs wrap quote) */
@@ -340,14 +351,14 @@ export function buildWrapQuoteMessage(input: {
   notes?: string;
 }) {
   const { vehicleType, finish, wrap, tint, notes } = input;
-  const colors = wrap.colors.join(", ");
+  const colors = wrapColorLabel(wrap);
   const lines = [
     "Wrap quote request (Customs simulator)",
     "",
-    `Vehicle model: ${vehicleType.name}`,
+    `Vehicle model: ${vehicleType.modelName} (${vehicleType.name})`,
     `Wrap finish: ${finish}`,
     `Wrap colour: ${wrap.name}${wrap.brand ? ` · ${wrap.brand}` : ""}${wrap.series ? ` ${wrap.series}` : ""}`,
-    `Wrap hex: ${colors}`,
+    isClearPpf(wrap) ? "Paint: factory OEM with clear PPF" : `Wrap hex: ${colors}`,
     `Window tint: ${tint.name}`,
   ];
   if (notes?.trim()) {

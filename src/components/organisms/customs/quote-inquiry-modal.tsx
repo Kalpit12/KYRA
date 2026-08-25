@@ -10,6 +10,7 @@ import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import {
   buildQuoteSummary,
   buildWrapQuoteMessage,
+  wrapColorLabel,
   type VehicleType,
   type WindowFilm,
   type WrapFinishId,
@@ -179,9 +180,9 @@ export function QuoteInquiryModal({
                   </p>
                   <p className="mt-1 text-sm text-foreground">{summary}</p>
                   <ul className="mt-2 space-y-0.5 font-mono text-[10px] tracking-[0.06em] text-kyra-steel uppercase">
-                    <li>Model · {vehicleType.name}</li>
+                    <li>Model · {vehicleType.modelName}</li>
                     <li>
-                      Wrap · {finish} · {wrap.name} ({wrap.colors[0]})
+                      Wrap · {finish} · {wrap.name} ({wrapColorLabel(wrap)})
                     </li>
                     <li>Tint · {tint.name}</li>
                   </ul>

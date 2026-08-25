@@ -51,6 +51,9 @@ export function VehicleSwitcher({
             )}
           >
             <span className="font-display font-semibold uppercase">{vehicle.name}</span>
+            <span className="mt-1 block font-mono text-[9px] tracking-[0.06em] text-white/40 uppercase">
+              {vehicle.modelName}
+            </span>
           </button>
         ))}
       </div>

@@ -108,11 +108,15 @@ export function WorkshopViewer({
 
   const handleFinishChange = (next: WrapFinishId) => {
     setFinish(next);
+    const current = getWrapById(wrapId);
     if (next === "carbon") {
-      const current = getWrapById(wrapId);
       if (current.category !== "carbon") {
         setWrapId("carbon-exposed");
       }
+      return;
+    }
+    if (current.category === "carbon") {
+      setWrapId(defaultWrapId);
     }
   };
 
@@ -127,10 +131,14 @@ export function WorkshopViewer({
   const toggleFullscreen = async () => {
     const node = rootRef.current;
     if (!node) return;
-    if (!document.fullscreenElement) {
-      await node.requestFullscreen();
-    } else {
-      await document.exitFullscreen();
+    try {
+      if (!document.fullscreenElement) {
+        await node.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      // Browser may deny fullscreen without a gesture or if the API is blocked.
     }
   };
 
@@ -249,7 +257,7 @@ export function WorkshopViewer({
                 {
                   id: "model" as const,
                   label: "Vehicle",
-                  detail: vehicleType.name,
+                  detail: vehicleType.modelName,
                   icon: Car,
                 },
                 {

@@ -102,8 +102,9 @@ export function WrapPopover({
       <div className="mt-3 h-[86px] overflow-y-auto sm:h-[96px]">
         <div className="grid grid-cols-7 gap-2 sm:grid-cols-8">
           {filteredWraps.map((wrap) => {
-            const isCarbon = wrap.category === "carbon" || finish === "carbon";
-            const isGradient = !isCarbon && wrap.colors.length > 1;
+            const isClearPpf = wrap.ppfType === "clear";
+            const isCarbon = !isClearPpf && (wrap.category === "carbon" || finish === "carbon");
+            const isGradient = !isCarbon && !isClearPpf && wrap.colors.length > 1;
             const background = isCarbon
               ? carbonSwatchBackground(
                   wrap.colors[0],
@@ -123,10 +124,18 @@ export function WrapPopover({
                   "h-9 w-9 rounded-full border-2 transition hover:scale-110",
                   wrapId === wrap.id
                     ? "scale-105 border-kyra-red ring-2 ring-kyra-red/30"
-                    : "border-transparent"
+                    : isClearPpf
+                      ? "border-white/35"
+                      : "border-transparent"
                 )}
                 style={
-                  isCarbon
+                  isClearPpf
+                    ? {
+                        backgroundImage:
+                          "linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(190,210,224,0.28) 48%, rgba(255,255,255,0.7) 100%)",
+                        backgroundColor: "transparent",
+                      }
+                    : isCarbon
                     ? {
                         backgroundColor: "#1a1a1a",
                         backgroundImage: background,

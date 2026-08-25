@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
@@ -48,15 +48,38 @@ function carbonTintColor(hex: string) {
   return c;
 }
 
+/** Clone factory paint and add a thicker clearcoat — never replace the OEM colour. */
+function enhanceOemPaintWithClearcoat(source: THREE.Material): THREE.MeshPhysicalMaterial {
+  const physical = new THREE.MeshPhysicalMaterial();
+  if (
+    source instanceof THREE.MeshPhysicalMaterial ||
+    source instanceof THREE.MeshStandardMaterial
+  ) {
+    physical.copy(source);
+  } else {
+    physical.color = new THREE.Color("#808080");
+  }
+
+  physical.name = "CarPaint";
+  physical.transparent = false;
+  physical.opacity = 1;
+  physical.side = THREE.FrontSide;
+  physical.clearcoat = 1;
+  physical.clearcoatRoughness = Math.min(physical.clearcoatRoughness || 0.12, 0.045);
+  physical.roughness = Math.max(0.03, (physical.roughness ?? 0.25) * 0.82);
+  physical.envMapIntensity = Math.min(1.55, (physical.envMapIntensity || 1) * 1.1);
+  return physical;
+}
+
 function createWrapMaterial(wrap: WrapOption, finish: WrapFinishId, primary: THREE.Color) {
   const preset = finishPresets[finish];
-  const ppf = wrap.ppfType && wrap.ppfType !== "none";
+  const ppf = wrap.ppfType === "tint";
   const material = new THREE.MeshPhysicalMaterial({
     name: "CarPaint",
     color: primary,
     roughness: Math.max(0.04, preset.roughness - (ppf ? 0.06 : 0)),
     metalness: Math.min(0.35, preset.metalness),
-    clearcoat: Math.min(1, preset.clearcoat + (wrap.ppfType === "clear" ? 0.15 : ppf ? 0.1 : 0)),
+    clearcoat: Math.min(1, preset.clearcoat + (ppf ? 0.1 : 0)),
     clearcoatRoughness: Math.max(0.02, preset.clearcoatRoughness * (ppf ? 0.75 : 1)),
     envMapIntensity: Math.min(1.45, preset.envMapIntensity),
     ior: 1.5,
@@ -162,7 +185,8 @@ export function CarModel({
   const primaryColor = wrap.colors[0];
   const secondaryColor = wrap.colors[1] ?? wrap.colors[0];
 
-  const clonedScene = useMemo(() => {
+  const { clonedScene, ownedMaterials } = useMemo(() => {
+    const ownedMaterials: THREE.Material[] = [];
     const clone = scene.clone(true);
     sharpenSceneTextures(clone, anisotropy);
 
@@ -171,32 +195,58 @@ export function CarModel({
     const lensMeshes = collectLensMeshes(clone);
     const { lamps: lampCovers } = classifyGlassBlackMeshes(clone);
 
-    const primary = new THREE.Color(hexToThreeColor(primaryColor));
-    if (wrap.colors.length > 1) {
-      primary.lerp(new THREE.Color(hexToThreeColor(secondaryColor)), 0.32);
-    }
-
-    const bodyMat = createWrapMaterial(wrap, finish, primary);
-    sharpenMaterialTextures(bodyMat, anisotropy);
     const windowMat = createWindowFilmMaterial(tint, liteMaterials);
+    ownedMaterials.push(windowMat);
 
-    wrapMeshes.forEach((mesh) => {
-      mesh.material = bodyMat;
-      mesh.castShadow = enableShadows;
-      mesh.receiveShadow = enableShadows;
-    });
+    if (wrap.ppfType === "clear") {
+      const clearcoatBySource = new Map<string, THREE.MeshPhysicalMaterial>();
+      wrapMeshes.forEach((mesh) => {
+        const source = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+        if (!source) return;
+        const key = source.uuid;
+        let coated = clearcoatBySource.get(key);
+        if (!coated) {
+          coated = enhanceOemPaintWithClearcoat(source);
+          sharpenMaterialTextures(coated, anisotropy);
+          clearcoatBySource.set(key, coated);
+          ownedMaterials.push(coated);
+        }
+        mesh.material = coated;
+        mesh.castShadow = enableShadows;
+        mesh.receiveShadow = enableShadows;
+      });
+    } else {
+      const primary = new THREE.Color(hexToThreeColor(primaryColor));
+      if (wrap.colors.length > 1) {
+        primary.lerp(new THREE.Color(hexToThreeColor(secondaryColor)), 0.32);
+      }
+
+      const bodyMat = createWrapMaterial(wrap, finish, primary);
+      sharpenMaterialTextures(bodyMat, anisotropy);
+      ownedMaterials.push(bodyMat);
+
+      wrapMeshes.forEach((mesh) => {
+        mesh.material = bodyMat;
+        mesh.castShadow = enableShadows;
+        mesh.receiveShadow = enableShadows;
+      });
+    }
 
     lensMeshes.forEach((mesh) => {
       if (wrapMeshes.has(mesh)) return;
       const source = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-      mesh.material = createLensGlassMaterial(source);
+      const lensMat = createLensGlassMaterial(source);
+      ownedMaterials.push(lensMat);
+      mesh.material = lensMat;
       mesh.castShadow = false;
     });
 
     lampCovers.forEach((mesh) => {
       if (wrapMeshes.has(mesh) || lensMeshes.has(mesh)) return;
       const source = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-      mesh.material = createLensGlassMaterial(source);
+      const lensMat = createLensGlassMaterial(source);
+      ownedMaterials.push(lensMat);
+      mesh.material = lensMat;
       mesh.castShadow = false;
     });
 
@@ -210,7 +260,7 @@ export function CarModel({
     sanitizeWorkshopModel(clone);
     normalizeModel(clone, WORKSHOP_SIZE * (modelScale ?? 1));
     clone.position.set(...CAR_OFFSET);
-    return clone;
+    return { clonedScene: clone, ownedMaterials };
   }, [
     scene,
     wrap,
@@ -224,6 +274,14 @@ export function CarModel({
     liteMaterials,
     anisotropy,
   ]);
+
+  useEffect(() => {
+    return () => {
+      for (const material of ownedMaterials) {
+        material.dispose();
+      }
+    };
+  }, [ownedMaterials]);
 
   return <primitive object={clonedScene} />;
 }
