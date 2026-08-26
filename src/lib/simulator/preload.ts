@@ -1,7 +1,6 @@
 import { resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
 import { DRACO_DECODER_PATH } from "@/lib/simulator/draco";
 import { warmStudioLockupTexture } from "@/lib/simulator/studio-lockup";
-import { vehicleTypes } from "@/lib/data/simulator";
 
 const prefetchedModels = new Set<string>();
 const decodedModels = new Set<string>();
@@ -18,6 +17,12 @@ function prefetchGlb(url: string) {
   document.head.appendChild(link);
 }
 
+/** HTTP cache only — does not decode the GLB into GPU memory. */
+export function prefetchSimulatorModel(modelPath: string) {
+  prefetchGlb(resolveSimulatorModelUrl(modelPath));
+}
+
+/** Decode a single GLB into the Three.js cache. Call only when the workshop opens it. */
 export function preloadSimulatorModel(modelPath: string) {
   const url = resolveSimulatorModelUrl(modelPath);
   prefetchGlb(url);
@@ -31,6 +36,22 @@ export function preloadSimulatorModel(modelPath: string) {
   });
 }
 
+export function releaseSimulatorModel(modelPath: string) {
+  const url = resolveSimulatorModelUrl(modelPath);
+  decodedModels.delete(url);
+  void import("@react-three/drei").then((mod) => {
+    const gltf = mod.useGLTF as typeof mod.useGLTF & {
+      clear?: (input: string) => void;
+    };
+    try {
+      gltf.clear?.(url);
+    } catch {
+      // best-effort GPU eviction
+    }
+  });
+}
+
+/** Load drei/fiber chunks only. Never decode vehicle GLBs here. */
 export function warmSimulatorRuntime() {
   warmStudioLockupTexture();
   void import("@react-three/fiber");
@@ -40,22 +61,4 @@ export function warmSimulatorRuntime() {
 
 export function warmDefaultSimulatorAssets() {
   warmSimulatorRuntime();
-  const sedan = vehicleTypes.find((vehicle) => vehicle.id === "sedan");
-  if (sedan) preloadSimulatorModel(sedan.modelPath);
-}
-
-export function warmAllSimulatorModelsIdle() {
-  if (typeof window === "undefined") return;
-
-  const run = () => {
-    for (const vehicle of vehicleTypes) {
-      prefetchGlb(resolveSimulatorModelUrl(vehicle.modelPath));
-    }
-  };
-
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(run, { timeout: 4000 });
-  } else {
-    globalThis.setTimeout(run, 2500);
-  }
 }

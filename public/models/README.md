@@ -17,9 +17,11 @@ Settings → Git, then redeploy.
 | `t7iquki8rj.glb` | BMW M3 Competition G80 (`t7iquki8rj.blend`) | Legacy sedan |
 | `audi-a7-sedan.glb` | CGTrader Audi A7 Sportback OBJ | Legacy sedan export |
 | `86ql3dghcf0.glb` | Hum3D Porsche 911 Carrera 4S (`86ql3dghcf0.blend`) | Coupe |
+| `bmw_x3.glb` | BMW X3 FBX (`3d models/BMW X3`, original textures, no Draco) | Mini SUV |
 | `cs6hv1t8ckpbo.glb` | Discovery-style SUV (`cs6hv1t8ckpbo.blend`) | Legacy SUV, Mini SUV |
 | `2022_toyota_land_cruiser_300_vx.r.glb` | Sketchfab 2022 Toyota Land Cruiser 300 VX.R (copied as-is, no recompress) | SUV |
-| `gqbnkbwsmehl.glb` | Studio vehicle (`gqbnkbwsmehl.blend`) | Pickup |
+| `ford_ranger.glb` | Ford Ranger double-cab OBJ (`3d models/FRD RANGER`) | Pickup |
+| `gqbnkbwsmehl.glb` | Studio vehicle (`gqbnkbwsmehl.blend`) | Legacy pickup |
 | `2025_volkswagen_golf_r.glb` | Sketchfab 2025 Volkswagen Golf R (copied as-is, no recompress) | Hatchback |
 | `toy-car.glb` | [Khronos ToyCar](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/ToyCar) | Fallback / legacy |
 | `car-concept.glb` | [Khronos CarConcept](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/main/Models/CarConcept) | Fallback / legacy |

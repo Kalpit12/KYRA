@@ -9,6 +9,7 @@ import { finishPresets, hexToThreeColor } from "@/lib/simulator/finish-presets";
 import { getCarbonTextures } from "@/lib/simulator/carbon-texture";
 import {
   classifyGlassBlackMeshes,
+  healWorkshopCabin,
   normalizeModel,
   sanitizeWorkshopModel,
   sharpenMaterialTextures,
@@ -110,11 +111,26 @@ function createWrapMaterial(wrap: WrapOption, finish: WrapFinishId, primary: THR
   return material;
 }
 
+const _windowSize = new THREE.Vector3();
+const _windowBox = new THREE.Box3();
+
+/** Closed glass volumes (X3 windshield hull) draw rims if both faces are lit. */
+function isVolumeGlassMesh(mesh: THREE.Mesh) {
+  const id = (mesh.name || "").toLowerCase().replace(/[_\-.#\s]/g, "");
+  // X3 windshield hull faces the cabin; FrontSide culls it from outside.
+  if (id.includes("bmwbase49")) return false;
+  _windowBox.setFromObject(mesh);
+  _windowBox.getSize(_windowSize);
+  return Math.min(_windowSize.x, _windowSize.y, _windowSize.z) > 0.12;
+}
+
 /** Cabin film without transmission — Hum3D GlassBlack is opaque white until replaced. */
-function createWindowFilmMaterial(tint: WindowFilm, lite = false) {
+function createWindowFilmMaterial(tint: WindowFilm, lite = false, volume = false) {
   const vlt = THREE.MathUtils.clamp(tint.transmission, 0, 1);
   const color = new THREE.Color("#cfd8e2").lerp(new THREE.Color(tint.overlayColor), 1 - vlt);
   const opacity = THREE.MathUtils.clamp(0.1 + (1 - vlt) * 0.72, 0.1, 0.84);
+  const side = volume ? THREE.FrontSide : THREE.DoubleSide;
+  const depthWrite = volume;
 
   if (lite) {
     return new THREE.MeshStandardMaterial({
@@ -125,8 +141,8 @@ function createWindowFilmMaterial(tint: WindowFilm, lite = false) {
       transparent: true,
       opacity,
       envMapIntensity: 0.45,
-      depthWrite: false,
-      side: THREE.DoubleSide,
+      depthWrite,
+      side,
     });
   }
 
@@ -140,8 +156,8 @@ function createWindowFilmMaterial(tint: WindowFilm, lite = false) {
     opacity,
     envMapIntensity: 0.7,
     ior: 1.45,
-    depthWrite: false,
-    side: THREE.DoubleSide,
+    depthWrite,
+    side,
   });
 }
 
@@ -181,22 +197,24 @@ export function CarModel({
 }: CarModelProps) {
   useGLTF.setDecoderPath(DRACO_DECODER_PATH);
   const { scene } = useGLTF(modelPath, DRACO_DECODER_PATH);
-  const anisotropy = useThree((state) => state.gl.capabilities.getMaxAnisotropy());
+  const anisotropy = Math.min(4, useThree((state) => state.gl.capabilities.getMaxAnisotropy()));
   const primaryColor = wrap.colors[0];
   const secondaryColor = wrap.colors[1] ?? wrap.colors[0];
 
   const { clonedScene, ownedMaterials } = useMemo(() => {
     const ownedMaterials: THREE.Material[] = [];
     const clone = scene.clone(true);
-    sharpenSceneTextures(clone, anisotropy);
+    sharpenSceneTextures(clone, anisotropy, liteMaterials ? 1024 : 2048);
+    healWorkshopCabin(clone);
 
     const wrapMeshes = collectWrapMeshes(clone);
     const windowMeshes = collectWindowMeshes(clone);
     const lensMeshes = collectLensMeshes(clone);
     const { lamps: lampCovers } = classifyGlassBlackMeshes(clone);
 
-    const windowMat = createWindowFilmMaterial(tint, liteMaterials);
-    ownedMaterials.push(windowMat);
+    const windowMat = createWindowFilmMaterial(tint, liteMaterials, false);
+    const windowVolumeMat = createWindowFilmMaterial(tint, liteMaterials, true);
+    ownedMaterials.push(windowMat, windowVolumeMat);
 
     if (wrap.ppfType === "clear") {
       const clearcoatBySource = new Map<string, THREE.MeshPhysicalMaterial>();
@@ -252,7 +270,8 @@ export function CarModel({
 
     windowMeshes.forEach((mesh) => {
       if (wrapMeshes.has(mesh) || lensMeshes.has(mesh) || lampCovers.has(mesh)) return;
-      mesh.material = windowMat;
+      mesh.material = isVolumeGlassMesh(mesh) ? windowVolumeMat : windowMat;
+      mesh.renderOrder = 2;
       mesh.castShadow = false;
       mesh.receiveShadow = enableShadows;
     });

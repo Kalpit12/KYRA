@@ -30,7 +30,7 @@ export function StudioLights({ preview = false }: { preview?: boolean }) {
         intensity={0.72}
         color="#fffdf8"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.00018}
         shadow-normalBias={0.022}
         shadow-camera-near={1}
@@ -53,7 +53,7 @@ export function StudioLights({ preview = false }: { preview?: boolean }) {
         color="#fff8ee"
       />
 
-      <Environment frames={1} resolution={1024} environmentIntensity={1.05}>
+      <Environment frames={1} resolution={256} environmentIntensity={1.05}>
         <Lightformer
           intensity={3.6}
           position={[0, 6.8, -1.2]}

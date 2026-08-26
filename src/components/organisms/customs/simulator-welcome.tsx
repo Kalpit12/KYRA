@@ -6,7 +6,7 @@ import { Button } from "@/components/atoms/button";
 import { Eyebrow } from "@/components/atoms/eyebrow";
 import { PageHeroVideo } from "@/components/molecules/page-hero-video";
 import { wrapCatalog, wrapFinishes, type WrapFinishId } from "@/lib/data/simulator";
-import { warmDefaultSimulatorAssets } from "@/lib/simulator/preload";
+import { warmSimulatorRuntime } from "@/lib/simulator/preload";
 
 const CUSTOMS_HERO_VIDEO = "/video/custom-hero.mp4";
 const CUSTOMS_HERO_POSTER = "/video/posters/custom-hero.jpg";
@@ -90,11 +90,11 @@ export function SimulatorWelcome({ onStart }: SimulatorWelcomeProps) {
             <Button
               size="lg"
               onClick={() => {
-                warmDefaultSimulatorAssets();
+                warmSimulatorRuntime();
                 onStart();
               }}
-              onMouseEnter={warmDefaultSimulatorAssets}
-              onFocus={warmDefaultSimulatorAssets}
+              onMouseEnter={warmSimulatorRuntime}
+              onFocus={warmSimulatorRuntime}
               className="px-10"
             >
               Launch Simulator
@@ -125,11 +125,11 @@ export function SimulatorWelcome({ onStart }: SimulatorWelcomeProps) {
               <button
                 type="button"
                 onClick={() => {
-                  warmDefaultSimulatorAssets();
+                  warmSimulatorRuntime();
                   onStart();
                 }}
-                onMouseEnter={warmDefaultSimulatorAssets}
-                onFocus={warmDefaultSimulatorAssets}
+                onMouseEnter={warmSimulatorRuntime}
+                onFocus={warmSimulatorRuntime}
                 className="group relative block aspect-[4/3] w-full overflow-hidden text-left"
                 aria-label="Open wrap simulator"
               >

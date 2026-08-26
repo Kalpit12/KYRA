@@ -16,7 +16,11 @@ import {
 } from "@/components/organisms/customs/three/workshop-error-boundary";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
 import { useGlbStatus, resolveSimulatorModelUrl } from "@/lib/simulator/assert-glb";
-import { preloadSimulatorModel, warmSimulatorRuntime } from "@/lib/simulator/preload";
+import {
+  preloadSimulatorModel,
+  releaseSimulatorModel,
+  warmSimulatorRuntime,
+} from "@/lib/simulator/preload";
 import { cn } from "@/lib/utils";
 import {
   defaultWindowFilmId,
@@ -24,7 +28,6 @@ import {
   getVehicleType,
   getWindowFilmById,
   getWrapById,
-  vehicleTypes,
   type VehicleTypeId,
   type WrapFinishId,
 } from "@/lib/data/simulator";
@@ -85,24 +88,9 @@ export function WorkshopViewer({
   }, [vehicleType.modelPath]);
 
   useEffect(() => {
-    const defaultPath = vehicleTypes[0]?.modelPath;
-    if (!defaultPath || defaultPath === vehicleType.modelPath) return;
-
-    const idle =
-      "requestIdleCallback" in window
-        ? window.requestIdleCallback.bind(window)
-        : (cb: () => void) => window.setTimeout(cb, 1200);
-
-    const id = idle(() => {
-      preloadSimulatorModel(defaultPath);
-    });
-
+    const path = vehicleType.modelPath;
     return () => {
-      if ("cancelIdleCallback" in window) {
-        window.cancelIdleCallback(id as number);
-      } else {
-        clearTimeout(id as number);
-      }
+      window.setTimeout(() => releaseSimulatorModel(path), 400);
     };
   }, [vehicleType.modelPath]);
 

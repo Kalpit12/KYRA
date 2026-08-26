@@ -12,7 +12,6 @@ import {
   type SimulatorStep,
   type VehicleTypeId,
 } from "@/lib/data/simulator";
-import { warmDefaultSimulatorAssets } from "@/lib/simulator/preload";
 
 const WorkshopViewer = dynamic(
   () =>
@@ -53,7 +52,6 @@ export function WrapSimulator() {
             vehicles={vehicleTypes}
             onBack={() => setStep(0)}
             onSelect={(id) => {
-              warmDefaultSimulatorAssets();
               setVehicleTypeId(id);
               setStep(2);
             }}

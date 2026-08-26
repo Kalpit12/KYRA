@@ -1,16 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import {
-  warmAllSimulatorModelsIdle,
-  warmDefaultSimulatorAssets,
-} from "@/lib/simulator/preload";
+import { warmSimulatorRuntime } from "@/lib/simulator/preload";
 
-/** Warms 3D studio assets while the user is on /customs. */
+/** Prefetch drei/fiber JS while the user is on /customs. Does not load GLBs. */
 export function SimulatorWarmup() {
   useEffect(() => {
-    warmDefaultSimulatorAssets();
-    warmAllSimulatorModelsIdle();
+    warmSimulatorRuntime();
   }, []);
 
   return null;

@@ -52,7 +52,7 @@ export function collectWindowMeshes(root: THREE.Object3D) {
     if (isInteriorMesh(child) || isLampHousingMesh(child)) return;
     const materials = meshMaterials(child);
     if (materials.some((mat) => isLensGlassMaterial(mat))) return;
-    if (materials.some((mat) => hasCabinGlassMaterial(mat))) {
+    if (child.userData.kyraCabinGlass || materials.some((mat) => hasCabinGlassMaterial(mat))) {
       selected.push(child);
     }
   });

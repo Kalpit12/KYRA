@@ -10,6 +10,7 @@ declare global {
  * Silence known Three.js / R3F noise that spams every frame and hurts perf:
  * - Clock deprecation (R3F v9)
  * - PCFSoftShadowMap deprecation (Three r183+)
+ * - WEBGL_lose_context missing on some GPUs when the renderer disposes
  */
 export function silenceThreeClockDeprecation() {
   if (typeof window === "undefined") return;
@@ -23,7 +24,8 @@ export function silenceThreeClockDeprecation() {
       type === "warn" &&
       typeof message === "string" &&
       (message.includes("Clock: This module has been deprecated") ||
-        message.includes("PCFSoftShadowMap has been deprecated"))
+        message.includes("PCFSoftShadowMap has been deprecated") ||
+        message.includes("WEBGL_lose_context extension not supported"))
     ) {
       return;
     }

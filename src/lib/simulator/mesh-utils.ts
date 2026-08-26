@@ -149,6 +149,7 @@ const TRIM_MATERIAL_HINTS = [
   "fabric",
   "plastic",
   "rubber",
+  "cladding",
 ];
 
 const INTERIOR_NAME_HINTS = ["int ", "interior"];
@@ -476,13 +477,49 @@ const MATERIAL_MAP_KEYS = [
   "thicknessMap",
 ] as const;
 
-/** Sharpen embedded GLB maps so 1–3k textures stay crisp on retina. */
-export function sharpenMaterialTextures(material: THREE.Material, anisotropy: number) {
+const MAX_WORKSHOP_ANISOTROPY = 4;
+
+function textureImageSize(tex: THREE.Texture): { w: number; h: number } | null {
+  const img = tex.image as { width?: number; height?: number } | undefined;
+  if (!img?.width || !img?.height) return null;
+  return { w: img.width, h: img.height };
+}
+
+/** Downscale huge GLB maps so 4k interiors cannot OOM the GPU tab. */
+function capTextureSize(tex: THREE.Texture, maxSize: number) {
+  if (typeof document === "undefined") return;
+  const size = textureImageSize(tex);
+  if (!size) return;
+  const longest = Math.max(size.w, size.h);
+  if (longest <= maxSize) return;
+
+  const scale = maxSize / longest;
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(size.w * scale));
+  canvas.height = Math.max(1, Math.round(size.h * scale));
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.drawImage(tex.image as CanvasImageSource, 0, 0, canvas.width, canvas.height);
+  if (typeof ImageBitmap !== "undefined" && tex.image instanceof ImageBitmap) {
+    tex.image.close();
+  }
+  tex.image = canvas;
+  tex.needsUpdate = true;
+}
+
+/** Sharpen embedded GLB maps so 1–2k textures stay crisp on retina. */
+export function sharpenMaterialTextures(
+  material: THREE.Material,
+  anisotropy: number,
+  maxTextureSize = 2048
+) {
   const record = material as unknown as Record<string, unknown>;
+  const safeAnisotropy = Math.min(MAX_WORKSHOP_ANISOTROPY, Math.max(1, anisotropy));
   for (const key of MATERIAL_MAP_KEYS) {
     const tex = record[key];
     if (!(tex instanceof THREE.Texture)) continue;
-    tex.anisotropy = Math.max(tex.anisotropy, anisotropy);
+    capTextureSize(tex, maxTextureSize);
+    tex.anisotropy = Math.max(tex.anisotropy, safeAnisotropy);
     tex.minFilter = THREE.LinearMipmapLinearFilter;
     tex.magFilter = THREE.LinearFilter;
     tex.generateMipmaps = true;
@@ -490,17 +527,80 @@ export function sharpenMaterialTextures(material: THREE.Material, anisotropy: nu
   }
 }
 
-export function sharpenSceneTextures(scene: THREE.Object3D, anisotropy: number) {
+export function sharpenSceneTextures(
+  scene: THREE.Object3D,
+  anisotropy: number,
+  maxTextureSize = 2048
+) {
   scene.traverse((child) => {
     if (!(child instanceof THREE.Mesh)) return;
     const materials = Array.isArray(child.material) ? child.material : [child.material];
     for (const material of materials) {
-      if (material) sharpenMaterialTextures(material, anisotropy);
+      if (material) sharpenMaterialTextures(material, anisotropy, maxTextureSize);
     }
   });
 }
 
 const _sanitizeSize = new THREE.Vector3();
+
+function compactMeshId(mesh: THREE.Mesh) {
+  return compactName(`${mesh.name} ${mesh.parent?.name ?? ""}`);
+}
+
+function meshMaterialsList(mesh: THREE.Mesh) {
+  return (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).filter(Boolean);
+}
+
+function forceInteriorMaterialOpaque(mat: THREE.Material) {
+  const std = mat as THREE.MeshPhysicalMaterial;
+  std.transparent = false;
+  std.opacity = 1;
+  std.depthWrite = true;
+  std.alphaTest = 0;
+  std.alphaMap = null;
+  if (std.transmission !== undefined) std.transmission = 0;
+}
+
+const X3_HIDE_GLASS_BLOCKERS = [
+  "object068",
+  "object082",
+  "object102",
+  "object106",
+  "object066",
+  "object081",
+  "object101",
+  "object105",
+];
+
+/**
+ * BMW X3: baked interiors export as BLEND (black UV padding punches seats).
+ * Duplicate side-window volumes and black door cards fill the openings so
+ * sides look pre-tinted while the windshield (no card) stays clear.
+ */
+export function healWorkshopCabin(root: THREE.Object3D) {
+  const meshes: THREE.Mesh[] = [];
+  root.traverse((child) => {
+    if (child instanceof THREE.Mesh) meshes.push(child);
+  });
+
+  for (const mesh of meshes) {
+    for (const mat of meshMaterialsList(mesh)) {
+      if (compactName(mat.name || "").startsWith("interior")) {
+        forceInteriorMaterialOpaque(mat);
+      }
+    }
+  }
+
+  const hasCabinHull = meshes.some((mesh) => compactMeshId(mesh).includes("bmwbase49"));
+  if (!hasCabinHull) return;
+
+  for (const mesh of meshes) {
+    const id = compactMeshId(mesh);
+    if (X3_HIDE_GLASS_BLOCKERS.some((token) => id.includes(token))) {
+      mesh.visible = false;
+    }
+  }
+}
 
 /**
  * Hum3D workshop cars export every material as double-sided. Inner paint/trim
@@ -594,9 +694,11 @@ export function sanitizeWorkshopModel(root: THREE.Object3D) {
       }
 
       if (name.includes("interior")) {
+        forceInteriorMaterialOpaque(std);
         std.metalness = 0;
         std.roughness = Math.max(std.roughness ?? 0.5, 0.74);
         std.envMapIntensity = 0.18;
+        std.side = THREE.FrontSide;
         continue;
       }
 
