@@ -7,7 +7,9 @@ import { SectionHeading } from "@/components/molecules/section-heading";
 import { TradeBand } from "@/components/molecules/trade-band";
 import { VehicleGallery } from "@/components/organisms/imports/vehicle-gallery";
 import { VehicleInquiryBar } from "@/components/organisms/imports/vehicle-inquiry-bar";
+import { VehicleJsonLd } from "@/components/atoms/site-json-ld";
 import { getVehicleBySlug, getVehicles } from "@/lib/admin/vehicles";
+import { absoluteUrl } from "@/lib/site-url";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -25,15 +27,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const vehicle = await getVehicleBySlug(slug);
   if (!vehicle) return { title: "Vehicle Not Found" };
 
+  const title = `${vehicle.year} ${vehicle.brand} ${vehicle.model}`;
+  const description =
+    vehicle.description ??
+    `${title} for sale at KYRA Platinum Imports, Nairobi. ${formatPrice(vehicle.price)}.`;
+
   return {
-    title: `${vehicle.brand} ${vehicle.model} ${vehicle.year}`,
-    description:
-      vehicle.description ??
-      `${vehicle.brand} ${vehicle.model} available at KYRA Platinum Imports.`,
+    title,
+    description,
+    alternates: { canonical: `/imports/${vehicle.slug}` },
     openGraph: {
-      title: `${vehicle.brand} ${vehicle.model}`,
+      title,
       description: formatPrice(vehicle.price),
+      url: absoluteUrl(`/imports/${vehicle.slug}`),
       images: [{ url: vehicle.image }],
+      type: "website",
     },
   };
 }
@@ -106,6 +114,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
 
   return (
     <>
+      <VehicleJsonLd vehicle={vehicle} />
       <section className="pt-24 pb-12 md:pt-[110px] md:pb-16">
         <div className="container-kyra px-6 md:px-12 lg:px-20">
           <div className="grid gap-10 lg:grid-cols-2 lg:gap-12">

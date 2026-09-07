@@ -6,7 +6,8 @@ import { getVehicles } from "@/lib/admin/vehicles";
 export const metadata: Metadata = {
   title: "Platinum Imports",
   description:
-    "Browse KYRA Platinum Imports — curated luxury vehicles with full import dossiers, verified history, and white-glove delivery in Nairobi.",
+    "Browse KYRA Platinum Imports in Nairobi — curated luxury vehicles with verified history, full import dossiers, and white-glove delivery from Spring Valley.",
+  alternates: { canonical: "/imports" },
 };
 
 export const revalidate = 60;

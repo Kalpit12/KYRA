@@ -1,7 +1,7 @@
 /** Public site origin for canonical URLs, sitemap, and Open Graph. */
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-  "https://kyra-alpha.vercel.app";
+  "https://www.kyragroup.co.ke";
 
 export function absoluteUrl(path = "/"): string {
   if (path.startsWith("http")) return path;

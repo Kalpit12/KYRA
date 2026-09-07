@@ -56,33 +56,41 @@ const sairaExtraCondensed = Saira_Extra_Condensed({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "KYRA | Premium Automotive Experiences",
+    default:
+      "KYRA | Luxury Car Imports, Wraps & Premium Wash in Nairobi",
     template: "%s | KYRA",
   },
   description:
-    "Kenya's most premium automotive lifestyle brand. Import. Customize. Maintain. KYRA Platinum Imports, KYRA Customs, and KYRA Wash.",
+    "KYRA Group in Spring Valley, Nairobi — luxury car imports, vehicle wraps, PPF, and premium car wash. KYRA Platinum Imports, KYRA Customs, and KYRA Wash.",
   keywords: [
-    "luxury cars Kenya",
-    "car imports Kenya",
-    "vehicle wrapping Nairobi",
-    "premium car wash Kenya",
-    "KYRA",
+    "KYRA Kenya",
+    "KYRA Platinum Imports",
+    "luxury car imports Nairobi",
+    "car wrapping Nairobi",
+    "PPF Kenya",
+    "premium car wash Nairobi",
+    "Spring Valley Westlands",
+    "kyragroup.co.ke",
   ],
   alternates: {
-    canonical: "./",
+    canonical: "/",
   },
   openGraph: {
-    title: "KYRA | Premium Automotive Experiences",
-    description: "Import. Customize. Maintain.",
+    title: "KYRA | Luxury Car Imports, Wraps & Premium Wash in Nairobi",
+    description:
+      "Import. Customize. Maintain. Showroom on Brookside Drive, Spring Valley, Nairobi.",
     type: "website",
     locale: "en_KE",
     siteName: "KYRA",
     url: SITE_URL,
+    images: [{ url: "/instagram/DZ7UoDaNWHm.jpg", width: 1200, height: 630, alt: "KYRA Platinum Imports" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KYRA | Premium Automotive Experiences",
-    description: "Import. Customize. Maintain.",
+    title: "KYRA | Luxury Car Imports, Wraps & Premium Wash in Nairobi",
+    description:
+      "Import. Customize. Maintain. Showroom on Brookside Drive, Spring Valley, Nairobi.",
+    images: ["/instagram/DZ7UoDaNWHm.jpg"],
   },
   robots: { index: true, follow: true },
   icons: {
@@ -110,7 +118,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-KE" suppressHydrationWarning>
       <body
         className={`${plusJakarta.variable} ${barlowCondensed.variable} ${syne.variable} ${ibmPlexMono.variable} ${outfit.variable} ${sairaExtraCondensed.variable} bg-background text-foreground antialiased`}
         suppressHydrationWarning

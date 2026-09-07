@@ -4,7 +4,8 @@ import { AboutContent } from "@/components/organisms/about/about-content";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "The KYRA story — premium automotive lifestyle brand in Spring Valley, Nairobi. Import, customize, and maintain with Kenya's performance car experts.",
+    "The KYRA Group story — luxury imports, customs, and premium wash from Brookside Drive, Spring Valley, Nairobi.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
