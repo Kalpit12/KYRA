@@ -107,13 +107,15 @@ export async function getDashboardStats() {
 
   const vehicles = vehiclesRes.data ?? [];
   const total = vehicles.length;
-  const available = vehicles.filter((v) => v.status === "available").length;
+  const inStock = vehicles.filter((v) => v.status === "in_stock").length;
+  const onTheWay = vehicles.filter((v) => v.status === "on_the_way").length;
   const reserved = vehicles.filter((v) => v.status === "reserved").length;
   const sold = vehicles.filter((v) => v.status === "sold").length;
 
   return {
     total,
-    available,
+    inStock,
+    onTheWay,
     reserved,
     sold,
     washBookings: bookingsRes.count ?? 0,

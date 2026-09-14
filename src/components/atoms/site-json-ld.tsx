@@ -2,6 +2,7 @@ import { kyraContact } from "@/lib/data/contact";
 import { INSTAGRAM } from "@/lib/data/home";
 import { CUSTOMS_INSTAGRAM } from "@/lib/data/wraps";
 import { absoluteUrl, SITE_URL } from "@/lib/site-url";
+import { schemaAvailability } from "@/lib/vehicle-status";
 import type { Vehicle } from "@/types";
 
 /** JSON-LD for crawlers and AI tools that prefer structured page data. */
@@ -111,12 +112,7 @@ export function VehicleJsonLd({ vehicle }: { vehicle: Vehicle }) {
     offers: {
       "@type": "Offer",
       url: absoluteUrl(`/imports/${vehicle.slug}`),
-      priceCurrency: "KES",
-      price: vehicle.price,
-      availability:
-        vehicle.status === "available"
-          ? "https://schema.org/InStock"
-          : "https://schema.org/PreOrder",
+      availability: schemaAvailability(vehicle.status),
       seller: {
         "@type": "AutoDealer",
         name: "KYRA Platinum Imports",

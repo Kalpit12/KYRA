@@ -14,14 +14,12 @@ import { WhatsAppFloat } from "@/components/molecules/whatsapp-float";
 import { Select } from "@/components/atoms/select";
 import { InstagramSection } from "@/components/organisms/imports/instagram-section";
 import { importsFaqs } from "@/lib/data/home";
-import type { Vehicle } from "@/types";
+import type { Vehicle, VehicleStatus } from "@/types";
 import {
-  BUDGET_MID,
   buildInventoryQueryString,
   filterVehicles,
   inventorySortOptions,
   normalizeBrand,
-  normalizeBudget,
   normalizeSort,
   parseInventoryParams,
   sortVehicles,
@@ -42,10 +40,9 @@ function stateFromParams(params: URLSearchParams) {
     search: params.get("q") ?? "",
     chip: parsed.chip,
     brand: parsed.brand,
-    budget: parsed.budget,
+    availability: parsed.availability,
     transmission: params.get("transmission") ?? "",
     fuel: params.get("fuel") ?? "",
-    maxPrice: params.get("maxPrice") ?? "",
     sort: normalizeSort(params.get("sort")),
   };
 }
@@ -64,11 +61,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
 
   const [filters, setFilters] = useState(() => stateFromParams(searchParams));
   const [showAdvanced, setShowAdvanced] = useState(
-    Boolean(
-      searchParams.get("transmission") ||
-        searchParams.get("fuel") ||
-        searchParams.get("maxPrice")
-    )
+    Boolean(searchParams.get("transmission") || searchParams.get("fuel"))
   );
 
   // Apply external URL changes (hero search, shared links, back/forward)
@@ -83,7 +76,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
       !didScrollForParams.current &&
       (searchParams.get("make") ||
         searchParams.get("type") ||
-        searchParams.get("budget") ||
+        searchParams.get("availability") ||
         searchParams.get("q"))
     ) {
       didScrollForParams.current = true;
@@ -117,8 +110,7 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
     Boolean(filters.brand) ||
     Boolean(filters.transmission) ||
     Boolean(filters.fuel) ||
-    Boolean(filters.maxPrice) ||
-    Boolean(filters.budget) ||
+    Boolean(filters.availability) ||
     filters.sort !== "newest";
 
   const clearFilters = useCallback(() => {
@@ -127,10 +119,9 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
       search: "",
       chip: "all",
       brand: "",
-      budget: "",
+      availability: "" as VehicleStatus | "",
       transmission: "",
       fuel: "",
-      maxPrice: "",
       sort: "newest" as InventorySort,
     });
     router.replace(pathname, { scroll: false });
@@ -140,11 +131,8 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
     setFilters((prev) => ({ ...prev, chip }));
   };
 
-  const handleBudgetChange = (budget: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      budget: normalizeBudget(budget),
-    }));
+  const handleAvailabilityChange = (availability: VehicleStatus | "") => {
+    setFilters((prev) => ({ ...prev, availability }));
   };
 
   const handleMakeSelect = (make: string) => {
@@ -179,16 +167,16 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
         <div className="container-kyra">
           <SectionHeading
             label="Current Stock"
-            title="Every unit comes with a full import dossier — not just a price tag."
+            title="Hand-selected luxury vehicles, imported with a complete dossier."
           />
 
           <div className="mt-10 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 flex-1">
               <FilterChips
                 bodyType={filters.chip}
-                budget={filters.budget}
+                availability={filters.availability}
                 onBodyChange={handleBodyChange}
-                onBudgetChange={handleBudgetChange}
+                onAvailabilityChange={handleAvailabilityChange}
               />
             </div>
             <div className="relative w-full lg:max-w-sm">
@@ -229,24 +217,10 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
                 Clear filters
               </button>
             )}
-
-            {filters.budget === BUDGET_MID && (
-              <span className="inline-flex min-h-[44px] items-center gap-2 font-mono text-[10px] tracking-[0.1em] text-muted-foreground uppercase">
-                Budget: {filters.budget}
-                <button
-                  type="button"
-                  onClick={() => handleBudgetChange("")}
-                  className="text-kyra-red hover:text-foreground"
-                  aria-label="Clear mid-range budget"
-                >
-                  <X size={12} aria-hidden />
-                </button>
-              </span>
-            )}
           </div>
 
           {showAdvanced && (
-            <div className="mt-4 grid gap-3 border border-border bg-muted p-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-3 border border-border bg-muted p-5 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <span className="form-label">Brand</span>
                 <Select
@@ -296,26 +270,6 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
                     setFilters((prev) => ({ ...prev, fuel: value }))
                   }
                   aria-label="Fuel"
-                />
-              </div>
-              <div>
-                <label htmlFor="filter-max-price" className="form-label">
-                  Max Price (KES)
-                </label>
-                <input
-                  id="filter-max-price"
-                  type="number"
-                  min={0}
-                  step={100000}
-                  placeholder="e.g. 20000000"
-                  value={filters.maxPrice}
-                  onChange={(e) =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      maxPrice: e.target.value,
-                    }))
-                  }
-                  className="form-input"
                 />
               </div>
             </div>

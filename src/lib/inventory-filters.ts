@@ -1,11 +1,15 @@
-import type { Vehicle } from "@/types";
+import type { Vehicle, VehicleStatus } from "@/types";
+import {
+  parseVehicleStatus,
+  PUBLIC_VEHICLE_STATUSES,
+  vehicleStatusLabels,
+} from "@/lib/vehicle-status";
 
 /** Body-type chips (mutually exclusive). */
 export type BodyTypeFilter = "all" | "suv" | "sedan" | "coupe";
 
 /**
- * Legacy chip id used by older FilterChips / URLs.
- * Prefer bodyType + budget going forward; kept for compatibility.
+ * Legacy chip ids kept for old shared URLs.
  */
 export type InventoryFilter =
   | BodyTypeFilter
@@ -20,16 +24,15 @@ export const bodyTypeFilters: { id: BodyTypeFilter; label: string }[] = [
   { id: "coupe", label: "Coupé" },
 ];
 
-export const budgetChipFilters: {
-  id: "under8" | "over12";
+export const availabilityFilters: {
+  id: VehicleStatus;
   label: string;
-  value: string;
-}[] = [
-  { id: "under8", label: "Under 8M", value: "Under KES 8M" },
-  { id: "over12", label: "Over 12M", value: "Over KES 12M" },
-];
+}[] = PUBLIC_VEHICLE_STATUSES.map((id) => ({
+  id,
+  label: vehicleStatusLabels[id],
+}));
 
-/** @deprecated Use bodyTypeFilters + budgetChipFilters */
+/** @deprecated Legacy chip ids kept for old shared URLs */
 export const inventoryFilters: { id: InventoryFilter; label: string }[] = [
   ...bodyTypeFilters,
   { id: "under8", label: "Under 8M" },
@@ -48,47 +51,31 @@ export const BUDGET_OVER_12M = "Over KES 12M";
 /** Legacy URL value from older chips */
 export const BUDGET_OVER_10M_LEGACY = "Over KES 10M";
 
-export type InventorySort =
-  | "newest"
-  | "price-asc"
-  | "price-desc"
-  | "year-desc"
-  | "mileage-asc";
+export type InventorySort = "newest" | "year-desc" | "mileage-asc";
 
 export interface InventoryQuery {
   search?: string;
   /** Active body-type chip */
   chip?: BodyTypeFilter;
-  /** @deprecated Prefer chip + budget */
+  /** @deprecated Prefer chip + availability */
   bodyType?: BodyTypeFilter;
   brand?: string;
   transmission?: string;
   fuel?: string;
-  maxPrice?: string;
-  /**
-   * Budget from hero or chips:
-   * "Under KES 8M" | "KES 8M – 12M" | "Over KES 12M"
-   */
-  budget?: string;
+  /** Public availability: in_stock | on_the_way | reserved */
+  availability?: VehicleStatus | "";
   /** Sort key for inventory results */
   sort?: InventorySort;
 }
 
 export const inventorySortOptions: { value: InventorySort; label: string }[] = [
   { value: "newest", label: "Newest" },
-  { value: "price-asc", label: "Price ↑" },
-  { value: "price-desc", label: "Price ↓" },
   { value: "year-desc", label: "Year ↓" },
   { value: "mileage-asc", label: "Mileage ↑" },
 ];
 
 export function normalizeSort(sort?: string | null): InventorySort {
-  if (
-    sort === "price-asc" ||
-    sort === "price-desc" ||
-    sort === "year-desc" ||
-    sort === "mileage-asc"
-  ) {
+  if (sort === "year-desc" || sort === "mileage-asc") {
     return sort;
   }
   return "newest";
@@ -100,10 +87,6 @@ export function sortVehicles(
 ): Vehicle[] {
   const list = [...vehicles];
   switch (sort) {
-    case "price-asc":
-      return list.sort((a, b) => a.price - b.price);
-    case "price-desc":
-      return list.sort((a, b) => b.price - a.price);
     case "year-desc":
       return list.sort((a, b) => b.year - a.year || a.mileage - b.mileage);
     case "mileage-asc":
@@ -191,32 +174,21 @@ export function normalizeBudget(budget: string): string {
 
 export function parseInventoryParams(
   params: URLSearchParams
-): Required<Pick<InventoryQuery, "brand" | "chip" | "budget">> {
+): Required<Pick<InventoryQuery, "brand" | "chip" | "availability">> {
   const make = normalizeBrand(params.get("make") ?? "");
   const type = params.get("type") ?? "";
-  const budget = normalizeBudget(params.get("budget") ?? "");
+  const availability = parseVehicleStatus(params.get("availability")) ?? "";
 
   return {
     brand: make,
     chip: parseBodyTypeParam(type),
-    budget,
+    availability: availability === "sold" ? "" : availability,
   };
 }
 
 function matchesBodyType(vehicle: Vehicle, chip: BodyTypeFilter): boolean {
   if (chip === "all") return true;
   return vehicle.bodyType === chip;
-}
-
-function matchesBudgetRange(vehicle: Vehicle, budget?: string): boolean {
-  const normalized = normalizeBudget(budget ?? "");
-  if (!normalized) return true;
-  if (normalized === BUDGET_UNDER_8M) return vehicle.price < UNDER_8M;
-  if (normalized === BUDGET_MID) {
-    return vehicle.price >= UNDER_8M && vehicle.price <= MID_BUDGET_MAX;
-  }
-  if (normalized === BUDGET_OVER_12M) return vehicle.price > OVER_12M;
-  return true;
 }
 
 function matchesSearch(vehicle: Vehicle, search?: string): boolean {
@@ -230,6 +202,7 @@ function matchesSearch(vehicle: Vehicle, search?: string): boolean {
     vehicle.fuel,
     vehicle.transmission,
     vehicle.status,
+    vehicleStatusLabels[vehicle.status],
   ]
     .join(" ")
     .toLowerCase();
@@ -244,7 +217,7 @@ export function filterVehicles(
   const chip: BodyTypeFilter =
     query.chip ?? query.bodyType ?? "all";
   const brand = normalizeBrand(query.brand ?? "");
-  const budget = normalizeBudget(query.budget ?? "");
+  const availability = query.availability || "";
 
   return vehicles.filter((vehicle) => {
     if (!matchesSearch(vehicle, query.search)) return false;
@@ -256,13 +229,9 @@ export function filterVehicles(
     }
     if (query.fuel && vehicle.fuel !== query.fuel) return false;
 
-    if (query.maxPrice) {
-      const max = Number(query.maxPrice);
-      if (!Number.isNaN(max) && max > 0 && vehicle.price > max) return false;
-    }
+    if (availability && vehicle.status !== availability) return false;
 
     if (!matchesBodyType(vehicle, chip)) return false;
-    if (!matchesBudgetRange(vehicle, budget)) return false;
 
     return true;
   });
@@ -274,14 +243,13 @@ export function buildInventoryQueryString(query: {
   brand?: string;
   transmission?: string;
   fuel?: string;
-  maxPrice?: string;
-  budget?: string;
+  availability?: VehicleStatus | "";
   sort?: InventorySort | string;
 }): string {
   const params = new URLSearchParams();
   const brand = normalizeBrand(query.brand ?? "");
-  const budget = normalizeBudget(query.budget ?? "");
   const sort = normalizeSort(query.sort);
+  const availability = parseVehicleStatus(query.availability ?? "") ?? "";
 
   if (brand) params.set("make", brand);
 
@@ -290,30 +258,14 @@ export function buildInventoryQueryString(query: {
   else if (chip === "sedan") params.set("type", "Sedan");
   else if (chip === "coupe") params.set("type", "Coupé");
 
-  // Price chips used to live in `chip`; map legacy ids into budget
-  let resolvedBudget = budget;
-  if (chip === "under8") resolvedBudget = BUDGET_UNDER_8M;
-  else if (chip === "over10" || chip === "over12") {
-    resolvedBudget = BUDGET_OVER_12M;
+  if (availability && availability !== "sold") {
+    params.set("availability", availability);
   }
-
-  if (resolvedBudget) params.set("budget", resolvedBudget);
 
   if (query.search?.trim()) params.set("q", query.search.trim());
   if (query.transmission) params.set("transmission", query.transmission);
   if (query.fuel) params.set("fuel", query.fuel);
-  if (query.maxPrice) params.set("maxPrice", query.maxPrice);
   if (sort !== "newest") params.set("sort", sort);
 
   return params.toString();
-}
-
-/** Active budget chip id for UI highlighting, if any. */
-export function budgetToChipId(
-  budget?: string
-): "under8" | "over12" | null {
-  const normalized = normalizeBudget(budget ?? "");
-  if (normalized === BUDGET_UNDER_8M) return "under8";
-  if (normalized === BUDGET_OVER_12M) return "over12";
-  return null;
 }

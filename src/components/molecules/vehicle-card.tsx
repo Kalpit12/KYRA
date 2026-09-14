@@ -3,7 +3,8 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { cn, formatPrice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { vehicleStatusLabels } from "@/lib/vehicle-status";
 import type { Vehicle } from "@/types";
 
 interface VehicleCardProps {
@@ -11,15 +12,11 @@ interface VehicleCardProps {
   index?: number;
 }
 
-const statusLabels: Record<Vehicle["status"], string> = {
-  available: "Import Ready",
-  reserved: "Reserved",
-  sold: "Sold",
-};
-
 const statusStyles: Record<Vehicle["status"], string> = {
-  available:
+  in_stock:
     "border-kyra-red/30 bg-kyra-red text-white shadow-[0_4px_14px_rgba(226,19,31,0.35)]",
+  on_the_way:
+    "border-amber-500/30 bg-amber-500 text-black shadow-[0_4px_14px_rgba(245,158,11,0.3)]",
   reserved:
     "border-foreground/20 bg-foreground text-background shadow-[0_4px_14px_rgba(0,0,0,0.25)]",
   sold: "border-border bg-muted text-muted-foreground",
@@ -77,13 +74,14 @@ export function VehicleCard({ vehicle, index = 0 }: VehicleCardProps) {
               <span
                 className={cn(
                   "h-1.5 w-1.5 shrink-0 rounded-full",
-                  vehicle.status === "available" && "bg-white",
+                  vehicle.status === "in_stock" && "bg-white",
+                  vehicle.status === "on_the_way" && "bg-black",
                   vehicle.status === "reserved" && "bg-kyra-red",
                   vehicle.status === "sold" && "bg-kyra-steel"
                 )}
                 aria-hidden
               />
-              {statusLabels[vehicle.status]}
+              {vehicleStatusLabels[vehicle.status]}
             </div>
             {vehicle.stockNumber && (
               <span className="absolute top-3 right-3 z-10 border border-white/30 bg-black/55 px-2 py-1 font-mono text-[9px] tracking-[0.12em] text-white uppercase">
@@ -120,10 +118,10 @@ export function VehicleCard({ vehicle, index = 0 }: VehicleCardProps) {
             <div className="mt-4 flex items-center justify-between border-t border-border pt-3.5">
               <div>
                 <p className="font-mono text-lg font-bold text-foreground">
-                  {formatPrice(vehicle.price)}
+                  {vehicleStatusLabels[vehicle.status]}
                 </p>
                 <span className="font-mono text-[10px] text-kyra-steel">
-                  Incl. import dossier
+                  Enquire for details
                 </span>
               </div>
               <span className="flex items-center gap-1.5 text-xs font-bold tracking-[0.08em] text-foreground uppercase">

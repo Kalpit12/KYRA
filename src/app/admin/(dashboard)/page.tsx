@@ -10,10 +10,12 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Truck,
 } from "lucide-react";
 import { getDashboardFeed } from "@/lib/admin/vehicles";
 import { washPackages } from "@/lib/data/wash";
-import { formatPrice, cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { vehicleStatusLabels } from "@/lib/vehicle-status";
 
 function washPackageLabel(packageId: string) {
   const pkg = washPackages.find((p) => p.id === packageId);
@@ -83,11 +85,18 @@ export default async function AdminDashboardPage() {
       note: `${stats.featured} featured`,
     },
     {
-      label: "Available",
-      value: stats.available,
-      href: "/admin/vehicles?status=available",
+      label: "In stock",
+      value: stats.inStock,
+      href: "/admin/vehicles?status=in_stock",
       icon: CheckCircle2,
-      note: "Ready to sell",
+      note: "Ready to view",
+    },
+    {
+      label: "On the way",
+      value: stats.onTheWay,
+      href: "/admin/vehicles?status=on_the_way",
+      icon: Truck,
+      note: "Inbound / in transit",
     },
     {
       label: "Reserved",
@@ -321,13 +330,10 @@ export default async function AdminDashboardPage() {
                         {vehicle.brand} {vehicle.model}
                       </p>
                       <p className="mt-0.5 font-mono text-[10px] tracking-[0.08em] text-kyra-steel uppercase">
-                        {vehicle.year} · {vehicle.status}
+                        {vehicle.year} · {vehicleStatusLabels[vehicle.status]}
                         {vehicle.featured ? " · Featured" : ""}
                       </p>
                     </div>
-                    <p className="shrink-0 text-sm font-medium text-foreground">
-                      {formatPrice(vehicle.price)}
-                    </p>
                   </Link>
                 </li>
               ))}

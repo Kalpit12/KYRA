@@ -5,33 +5,35 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/atoms/button";
 import { Select } from "@/components/atoms/select";
+import { INVENTORY_MAKES } from "@/lib/inventory-filters";
 import {
-  BUDGET_MID,
-  BUDGET_OVER_12M,
-  BUDGET_UNDER_8M,
-  INVENTORY_MAKES,
-} from "@/lib/inventory-filters";
+  parseVehicleStatus,
+  PUBLIC_VEHICLE_STATUSES,
+  vehicleStatusLabels,
+} from "@/lib/vehicle-status";
 
 const makes = ["All Makes", ...INVENTORY_MAKES];
 const types = ["All Types", "SUV", "Sedan", "Coupé", "Sports"];
-const budgets = [
-  "Any Budget",
-  BUDGET_UNDER_8M,
-  BUDGET_MID,
-  BUDGET_OVER_12M,
+const availabilityOptions = [
+  { value: "", label: "Any availability" },
+  ...PUBLIC_VEHICLE_STATUSES.map((status) => ({
+    value: status,
+    label: vehicleStatusLabels[status],
+  })),
 ];
 
 export function HeroSearchCard() {
   const router = useRouter();
   const [make, setMake] = useState(makes[0]);
   const [type, setType] = useState(types[0]);
-  const [budget, setBudget] = useState(budgets[0]);
+  const [availability, setAvailability] = useState("");
 
   const handleSearch = () => {
     const params = new URLSearchParams();
     if (make !== "All Makes") params.set("make", make);
     if (type !== "All Types") params.set("type", type);
-    if (budget !== "Any Budget") params.set("budget", budget);
+    const status = parseVehicleStatus(availability);
+    if (status && status !== "sold") params.set("availability", status);
     const query = params.toString();
     router.push(query ? `/imports?${query}#inventory` : "/imports#inventory");
   };
@@ -56,13 +58,13 @@ export function HeroSearchCard() {
           aria-label="Type"
         />
       </Field>
-      <Field label="Budget" className="md:col-span-2 md:max-w-[calc(50%-7px)]">
+      <Field label="Availability" className="md:col-span-2 md:max-w-[calc(50%-7px)]">
         <Select
           size="sm"
-          value={budget}
-          options={budgets}
-          onChange={setBudget}
-          aria-label="Budget"
+          value={availability}
+          options={availabilityOptions}
+          onChange={setAvailability}
+          aria-label="Availability"
         />
       </Field>
       <Button

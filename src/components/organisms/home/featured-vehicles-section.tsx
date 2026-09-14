@@ -18,7 +18,7 @@ export function FeaturedVehiclesSection({
         <div className="mb-12 flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
           <SectionHeading
             label="Current Stock"
-            title="Every unit comes with a full import dossier — not just a price tag."
+            title="Hand-selected luxury vehicles, imported with a complete dossier."
             subtitle="Hand-selected luxury vehicles, imported with precision and delivered with white-glove service."
           />
           <Button href="/imports" variant="secondary" size="sm" className="shrink-0">

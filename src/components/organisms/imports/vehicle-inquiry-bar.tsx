@@ -5,13 +5,15 @@ import { Calendar, Phone } from "lucide-react";
 import { Button } from "@/components/atoms/button";
 import { WhatsAppIcon } from "@/components/atoms/whatsapp-icon";
 import { kyraContact } from "@/lib/data/contact";
-import { cn, formatPrice, formatWhatsAppLink } from "@/lib/utils";
+import { cn, formatWhatsAppLink } from "@/lib/utils";
+import { vehicleStatusLabels } from "@/lib/vehicle-status";
+import type { VehicleStatus } from "@/types";
 
 interface VehicleInquiryBarProps {
   brand: string;
   model: string;
   year: number;
-  price: number;
+  status: VehicleStatus;
   className?: string;
 }
 
@@ -19,7 +21,7 @@ export function VehicleInquiryBar({
   brand,
   model,
   year,
-  price,
+  status,
   className,
 }: VehicleInquiryBarProps) {
   const [stuck, setStuck] = useState(false);
@@ -100,7 +102,9 @@ export function VehicleInquiryBar({
             <p className="truncate font-display text-sm font-semibold uppercase text-foreground">
               {title}
             </p>
-            <p className="font-mono text-xs text-kyra-steel">{formatPrice(price)}</p>
+            <p className="font-mono text-xs text-kyra-steel">
+              {vehicleStatusLabels[status]}
+            </p>
           </div>
           <a
             href={whatsappHref}
@@ -140,7 +144,7 @@ export function VehicleInquiryBar({
           {title}
         </p>
         <p className="mt-0.5 font-mono text-sm text-kyra-steel">
-          {formatPrice(price)}
+          {vehicleStatusLabels[status]}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Button href={whatsappHref} variant="primary" size="sm" showArrow={false}>

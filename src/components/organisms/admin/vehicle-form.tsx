@@ -33,7 +33,7 @@ const vehicleSchema = z.object({
   brand: z.string().min(1, "Brand is required"),
   model: z.string().min(1, "Model is required"),
   year: z.number().int("Year must be a whole number").min(1990).max(2100),
-  price: z.number().int("Price must be a whole number").min(0, "Price must be at least 0"),
+  price: z.number().int().min(0).optional(),
   transmission: z.enum(["Automatic", "Manual"], {
     error: "Transmission is required",
   }),
@@ -41,7 +41,7 @@ const vehicleSchema = z.object({
     error: "Fuel type is required",
   }),
   mileage: z.number().int("Mileage must be a whole number").min(0, "Mileage must be at least 0"),
-  status: z.enum(["available", "reserved", "sold"], {
+  status: z.enum(["in_stock", "on_the_way", "reserved", "sold"], {
     error: "Status is required",
   }),
   featured: z.boolean(),
@@ -136,11 +136,10 @@ export function VehicleForm({ initial }: VehicleFormProps) {
     brand: initial?.brand ?? "",
     model: initial?.model ?? "",
     year: String(initial?.year ?? new Date().getFullYear()),
-    price: String(initial?.price ?? ""),
     transmission: initial?.transmission ?? "Automatic",
     fuel: initial?.fuel ?? "Petrol",
     mileage: String(initial?.mileage ?? 0),
-    status: (initial?.status ?? "available") as VehicleStatus,
+    status: (initial?.status ?? "in_stock") as VehicleStatus,
     featured: Boolean(initial?.featured),
     bodyType: initial?.bodyType ?? "",
     description: initial?.description ?? "",
@@ -212,13 +211,12 @@ export function VehicleForm({ initial }: VehicleFormProps) {
 
     try {
       const year = parseIntegerInput(form.year, "Year");
-      const price = parseIntegerInput(form.price, "Price");
       const mileage = parseIntegerInput(form.mileage, "Mileage");
 
       const parsed = vehicleSchema.parse({
         ...form,
         year,
-        price,
+        price: initial?.price ?? 0,
         mileage,
         slug: form.slug || autoSlug,
         featured: form.featured,
@@ -251,7 +249,7 @@ export function VehicleForm({ initial }: VehicleFormProps) {
         brand: parsed.brand,
         model: parsed.model,
         year: parsed.year,
-        price: parsed.price,
+        price: parsed.price ?? 0,
         transmission: parsed.transmission,
         fuel: parsed.fuel,
         mileage: parsed.mileage,
@@ -308,7 +306,6 @@ export function VehicleForm({ initial }: VehicleFormProps) {
             brand: "Brand",
             model: "Model",
             year: "Year",
-            price: "Price",
             mileage: "Mileage",
             transmission: "Transmission",
             fuel: "Fuel",
@@ -340,7 +337,7 @@ export function VehicleForm({ initial }: VehicleFormProps) {
     >
       <Section
         title="Identity"
-        subtitle="Core listing details buyers see first — aligned with dealer VDP standards."
+        subtitle="Core listing details buyers see first. Availability is shown on the storefront instead of a public price."
       >
         <Field label="Brand">
           <input
@@ -406,18 +403,11 @@ export function VehicleForm({ initial }: VehicleFormProps) {
             value={form.status}
             onChange={(e) => update("status", e.target.value)}
           >
-            <option value="available">Available</option>
+            <option value="in_stock">In stock</option>
+            <option value="on_the_way">On the way</option>
             <option value="reserved">Reserved</option>
             <option value="sold">Sold</option>
           </select>
-        </Field>
-        <Field label="Price (KES)">
-          <input
-            className="form-input"
-            value={form.price}
-            onChange={(e) => update("price", e.target.value)}
-            required
-          />
         </Field>
         <Field label="Slug">
           <input

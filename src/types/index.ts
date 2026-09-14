@@ -1,4 +1,4 @@
-export type VehicleStatus = "available" | "reserved" | "sold";
+export type VehicleStatus = "in_stock" | "on_the_way" | "reserved" | "sold";
 
 export type VehicleCondition = "new" | "used";
 

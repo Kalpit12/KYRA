@@ -7,13 +7,13 @@ import { useSearchParams } from "next/navigation";
 import { Pencil, Trash2, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { mapVehicleRow, type VehicleRow } from "@/lib/admin/types";
-import type { Vehicle, VehicleStatus } from "@/types";
-import { formatPrice } from "@/lib/utils";
+import type { Vehicle } from "@/types";
+import { vehicleStatusLabels, VEHICLE_STATUSES, parseVehicleStatus } from "@/lib/vehicle-status";
 import { Button } from "@/components/atoms/button";
 
 export default function AdminVehiclesClient() {
   const searchParams = useSearchParams();
-  const statusFilter = searchParams.get("status") as VehicleStatus | null;
+  const statusFilter = parseVehicleStatus(searchParams.get("status"));
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export default function AdminVehiclesClient() {
       </div>
 
       <div className="mt-6 flex flex-wrap gap-2">
-        {([null, "available", "reserved", "sold"] as const).map((status) => {
+        {([null, ...VEHICLE_STATUSES] as const).map((status) => {
           const href = status
             ? `/admin/vehicles?status=${status}`
             : "/admin/vehicles";
@@ -100,7 +100,7 @@ export default function AdminVehiclesClient() {
                   : "border border-border bg-background text-muted-foreground hover:text-foreground"
               }`}
             >
-              {status ?? "All"}
+              {status ? vehicleStatusLabels[status] : "All"}
             </Link>
           );
         })}
@@ -125,7 +125,6 @@ export default function AdminVehiclesClient() {
               <tr>
                 <th className="px-4 py-3">Vehicle</th>
                 <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Price</th>
                 <th className="px-4 py-3">Featured</th>
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
@@ -154,11 +153,8 @@ export default function AdminVehiclesClient() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 capitalize text-muted-foreground">
-                    {vehicle.status}
-                  </td>
-                  <td className="px-4 py-3 text-foreground">
-                    {formatPrice(vehicle.price)}
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {vehicleStatusLabels[vehicle.status]}
                   </td>
                   <td className="px-4 py-3">
                     <button

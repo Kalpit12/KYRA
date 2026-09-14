@@ -2,24 +2,25 @@
 
 import { cn } from "@/lib/utils";
 import {
+  availabilityFilters,
   bodyTypeFilters,
-  budgetChipFilters,
   type BodyTypeFilter,
 } from "@/lib/inventory-filters";
+import type { VehicleStatus } from "@/types";
 
 interface FilterChipsProps {
   bodyType: BodyTypeFilter;
-  budget: string;
+  availability: VehicleStatus | "";
   onBodyChange: (filter: BodyTypeFilter) => void;
-  onBudgetChange: (budget: string) => void;
+  onAvailabilityChange: (status: VehicleStatus | "") => void;
   className?: string;
 }
 
 export function FilterChips({
   bodyType,
-  budget,
+  availability,
   onBodyChange,
-  onBudgetChange,
+  onAvailabilityChange,
   className,
 }: FilterChipsProps) {
   return (
@@ -45,13 +46,13 @@ export function FilterChips({
         </button>
       ))}
 
-      {budgetChipFilters.map((filter) => {
-        const isActive = budget === filter.value;
+      {availabilityFilters.map((filter) => {
+        const isActive = availability === filter.id;
         return (
           <button
             key={filter.id}
             type="button"
-            onClick={() => onBudgetChange(isActive ? "" : filter.value)}
+            onClick={() => onAvailabilityChange(isActive ? "" : filter.id)}
             className={cn(
               "min-h-[44px] shrink-0 cursor-pointer border px-4 py-2.5 font-mono text-xs tracking-[0.04em] uppercase transition-all duration-200 sm:shrink",
               isActive

@@ -183,12 +183,12 @@ export const importsFaqs = [
     a: "Full vehicle history, inspection reports, shipping and clearance documentation, and all paperwork needed for registration in Kenya — so you buy with complete transparency.",
   },
   {
-    q: "Are listed prices all-in?",
-    a: "Prices shown are for the vehicle as listed. Duties, clearance, and delivery are confirmed in your quote so there are no surprises at handover.",
+    q: "How do I get a price?",
+    a: "Listings show availability — in stock, on the way, or reserved — not a public price. Enquire on WhatsApp or book a viewing and we'll quote privately against the dossier.",
   },
   {
     q: "How long does sourcing and delivery take?",
-    a: "In-stock units can be reserved immediately. Sourced imports typically take several weeks depending on origin, shipping, and clearance timelines.",
+    a: "In-stock units can be viewed immediately. Vehicles marked on the way are inbound — we'll confirm arrival windows when you enquire.",
   },
   {
     q: "Can I view a vehicle before buying?",

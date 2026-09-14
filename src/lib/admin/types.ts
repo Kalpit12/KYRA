@@ -2,8 +2,8 @@ import type {
   Vehicle,
   VehicleBodyType,
   VehicleCondition,
-  VehicleStatus,
 } from "@/types";
+import { parseVehicleStatus } from "@/lib/vehicle-status";
 
 export type VehicleRow = {
   id: string;
@@ -17,7 +17,7 @@ export type VehicleRow = {
   mileage: number;
   image: string;
   images: string[] | null;
-  status: VehicleStatus;
+  status: string;
   featured: boolean;
   body_type: VehicleBodyType | null;
   description: string | null;
@@ -76,7 +76,7 @@ export function mapVehicleRow(row: VehicleRow): Vehicle {
     mileage: row.mileage,
     image: row.image,
     images: row.images?.length ? row.images : [row.image],
-    status: row.status,
+    status: parseVehicleStatus(row.status) ?? "in_stock",
     featured: row.featured,
     bodyType: row.body_type ?? undefined,
     description: row.description ?? undefined,

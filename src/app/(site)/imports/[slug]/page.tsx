@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { formatPrice } from "@/lib/utils";
 import { Eyebrow } from "@/components/atoms/eyebrow";
 import { VehicleCard } from "@/components/molecules/vehicle-card";
 import { SectionHeading } from "@/components/molecules/section-heading";
@@ -10,6 +9,10 @@ import { VehicleInquiryBar } from "@/components/organisms/imports/vehicle-inquir
 import { VehicleJsonLd } from "@/components/atoms/site-json-ld";
 import { getVehicleBySlug, getVehicles } from "@/lib/admin/vehicles";
 import { absoluteUrl } from "@/lib/site-url";
+import {
+  schemaAvailability,
+  vehicleStatusLabels,
+} from "@/lib/vehicle-status";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -30,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = `${vehicle.year} ${vehicle.brand} ${vehicle.model}`;
   const description =
     vehicle.description ??
-    `${title} for sale at KYRA Platinum Imports, Nairobi. ${formatPrice(vehicle.price)}.`;
+    `${title} at KYRA Platinum Imports, Nairobi. ${vehicleStatusLabels[vehicle.status]}.`;
 
   return {
     title,
@@ -38,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: { canonical: `/imports/${vehicle.slug}` },
     openGraph: {
       title,
-      description: formatPrice(vehicle.price),
+      description: `${title} — ${vehicleStatusLabels[vehicle.status]} at KYRA Platinum Imports.`,
       url: absoluteUrl(`/imports/${vehicle.slug}`),
       images: [{ url: vehicle.image }],
       type: "website",
@@ -101,7 +104,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
       ? { label: "Stock #", value: vehicle.stockNumber }
       : null,
     vehicle.warranty ? { label: "Warranty", value: vehicle.warranty } : null,
-    { label: "Status", value: vehicle.status },
+    { label: "Status", value: vehicleStatusLabels[vehicle.status] },
   ].filter(Boolean) as { label: string; value: string }[];
 
   const techSpecs: Record<string, string> = {
@@ -134,10 +137,10 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 ) : null}
               </h1>
               <p className="mt-3 font-mono text-2xl font-bold text-foreground">
-                {formatPrice(vehicle.price)}
+                {vehicleStatusLabels[vehicle.status]}
               </p>
               <span className="mt-1 font-mono text-[10px] text-kyra-steel">
-                Incl. import dossier
+                Enquire for details
               </span>
 
               <div className="mt-6 space-y-2">
@@ -161,7 +164,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
                 brand={vehicle.brand}
                 model={vehicle.model}
                 year={vehicle.year}
-                price={vehicle.price}
+                status={vehicle.status}
                 className="mt-8"
               />
             </div>
@@ -242,12 +245,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
             },
             offers: {
               "@type": "Offer",
-              price: vehicle.price,
-              priceCurrency: "KES",
-              availability:
-                vehicle.status === "available"
-                  ? "https://schema.org/InStock"
-                  : "https://schema.org/OutOfStock",
+              availability: schemaAvailability(vehicle.status),
             },
           }),
         }}
