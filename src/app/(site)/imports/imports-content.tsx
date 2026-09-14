@@ -353,8 +353,12 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
 
           {filtered.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-kyra-steel">No vehicles match your filters.</p>
-              {hasActiveFilters && (
+              <p className="text-kyra-steel">
+                {vehicles.length === 0
+                  ? "No vehicles in stock yet."
+                  : "No vehicles match your filters."}
+              </p>
+              {hasActiveFilters && vehicles.length > 0 && (
                 <button
                   type="button"
                   onClick={clearFilters}

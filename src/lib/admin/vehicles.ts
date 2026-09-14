@@ -7,7 +7,6 @@ import {
   type WashBookingRow,
 } from "@/lib/admin/types";
 import type { Vehicle } from "@/types";
-import { latestVehicles as fallbackVehicles } from "@/lib/data/home";
 
 const LOCAL_IMAGE_FALLBACK = "/instagram/DZCTN25CAGy.jpg";
 
@@ -17,16 +16,12 @@ function isUnsplashUrl(src: string) {
 
 /** Stock Unsplash URLs time out through the Next image optimizer — use local photos. */
 function localizeStockPhotos(vehicle: Vehicle): Vehicle {
-  const seed = fallbackVehicles.find((v) => v.slug === vehicle.slug);
-  const replace = (src: string, index: number) => {
-    if (!isUnsplashUrl(src)) return src;
-    return seed?.images[index] ?? seed?.image ?? LOCAL_IMAGE_FALLBACK;
-  };
+  const replace = (src: string) => (isUnsplashUrl(src) ? LOCAL_IMAGE_FALLBACK : src);
   const images = vehicle.images.map(replace);
   return {
     ...vehicle,
-    image: replace(vehicle.image, 0),
-    images: images.length ? images : [replace(vehicle.image, 0)],
+    image: replace(vehicle.image),
+    images: images.length ? images : [replace(vehicle.image)],
   };
 }
 
@@ -45,12 +40,12 @@ export async function getVehicles(): Promise<Vehicle[]> {
       .order("created_at", { ascending: false });
 
     if (error || !data?.length) {
-      return publicVehicles(fallbackVehicles);
+      return [];
     }
 
     return publicVehicles((data as VehicleRow[]).map(mapVehicleRow));
   } catch {
-    return publicVehicles(fallbackVehicles);
+    return [];
   }
 }
 
@@ -65,12 +60,12 @@ export async function getFeaturedVehicles(): Promise<Vehicle[]> {
       .order("created_at", { ascending: false });
 
     if (error || !data?.length) {
-      return publicVehicles(fallbackVehicles.filter((v) => v.featured));
+      return [];
     }
 
     return publicVehicles((data as VehicleRow[]).map(mapVehicleRow));
   } catch {
-    return publicVehicles(fallbackVehicles.filter((v) => v.featured));
+    return [];
   }
 }
 
@@ -84,18 +79,14 @@ export async function getVehicleBySlug(slug: string): Promise<Vehicle | null> {
       .maybeSingle();
 
     if (error || !data) {
-      const fallback = fallbackVehicles.find((v) => v.slug === slug) ?? null;
-      if (!fallback || fallback.status === "sold") return null;
-      return localizeStockPhotos(fallback);
+      return null;
     }
 
     const vehicle = localizeStockPhotos(mapVehicleRow(data as VehicleRow));
     if (vehicle.status === "sold") return null;
     return vehicle;
   } catch {
-    const fallback = fallbackVehicles.find((v) => v.slug === slug) ?? null;
-    if (!fallback || fallback.status === "sold") return null;
-    return localizeStockPhotos(fallback);
+    return null;
   }
 }
 

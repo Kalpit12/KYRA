@@ -10,6 +10,8 @@ export function FeaturedVehiclesSection({
 }: {
   vehicles: Vehicle[];
 }) {
+  if (vehicles.length === 0) return null;
+
   return (
     <section className="section-padding relative bg-background" id="inventory">
       <div className="container-kyra">
