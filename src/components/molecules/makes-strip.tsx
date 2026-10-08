@@ -33,6 +33,7 @@ function MakeLogo({
   return (
     <BrandLogo
       brand={make}
+      variant="platinum"
       className={cn(
         "transition-opacity duration-300",
         active ? "opacity-100" : "opacity-100 hover:opacity-80",
@@ -93,7 +94,7 @@ export function MakesStrip({
 
   // Imports / filter strip: single row, scroll horizontally if needed
   return (
-    <section className={cn("border-y border-border py-6", className)}>
+    <section className={cn("border-y border-border bg-background py-6", className)}>
       {onSelect && (
         <p className="container-kyra mb-3 px-6 font-mono text-[10px] tracking-[0.14em] text-kyra-steel uppercase md:hidden">
           Tap a make to filter →
@@ -101,7 +102,7 @@ export function MakesStrip({
       )}
 
       <div className="container-kyra scroll-fade-x overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:px-8 md:px-12 lg:px-20">
-        <div className="flex min-w-max items-center justify-center">
+        <div className="makes-strip-logos flex min-w-max items-center justify-center">
           {makes.map((make, index) => {
             const normalized = normalizeBrand(make);
             const isActive = active === normalized;

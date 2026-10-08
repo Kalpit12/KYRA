@@ -34,6 +34,18 @@ interface ImportsContentProps {
 const transmissions = ["Automatic", "Manual"] as const;
 const fuels = ["Petrol", "Diesel", "Hybrid", "Electric"] as const;
 
+function ImportsHeroTitle() {
+  return (
+    <h1
+      className="font-hero mt-4 max-w-3xl text-[clamp(1.875rem,5vw,4rem)] leading-[0.98] text-foreground"
+      aria-label="Find your next drive"
+    >
+      Find your
+      <span className="text-kyra-red"> next drive.</span>
+    </h1>
+  );
+}
+
 function stateFromParams(params: URLSearchParams) {
   const parsed = parseInventoryParams(params);
   return {
@@ -145,14 +157,14 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
   };
 
   return (
-    <>
+    <div data-platinum-theme>
       <PageHero
         eyebrow="KYRA Platinum Imports"
         title="Find your next drive."
+        titleNode={<ImportsHeroTitle />}
         subtitle="Curated luxury vehicles, hand-selected and imported with full documentation and a complete import dossier."
         showChevrons
         showShard={false}
-        overlay={false}
         backgroundVideo="/video/urus-imports-hero.mp4"
         backgroundImage="/video/posters/urus-imports-hero.jpg"
       />
@@ -341,6 +353,6 @@ export function ImportsContent({ vehicles }: ImportsContentProps) {
 
       <TradeBand />
       <WhatsAppFloat />
-    </>
+    </div>
   );
 }

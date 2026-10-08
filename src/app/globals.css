@@ -376,6 +376,16 @@ h4 {
   @apply mb-1.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-kyra-steel;
 }
 
+/* Footer logo: mix-blend-darken disappears on dark backgrounds. */
+footer .kyra-brand-logo-wrap {
+  background: rgb(0 0 0 / 0.65);
+}
+
+footer .kyra-brand-logo-wrap img {
+  mix-blend-mode: normal;
+  filter: brightness(1.08) contrast(1.05);
+}
+
 .contact-form-glow {
   border: 1px solid rgba(226, 19, 31, 0.35);
   box-shadow:
@@ -494,6 +504,27 @@ h4 {
   .hero-beams-fallback__stripes {
     animation: none;
   }
+}
+
+/* Theme-aware fade from hero media into the next section (not page-specific palettes). */
+.hero-fade-to-section {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  height: clamp(5rem, 14vh, 9rem);
+  background: linear-gradient(
+    to top,
+    var(--background) 0%,
+    color-mix(in srgb, var(--background) 50%, transparent) 50%,
+    transparent 100%
+  );
+}
+
+.hero-fade-to-section--tall {
+  height: clamp(7rem, 28vh, 16rem);
 }
 
 
@@ -766,6 +797,71 @@ body:has([data-wash-theme]) .text-flow-red {
     -webkit-background-clip: text;
     background-clip: text;
   }
+}
+
+/*
+  KYRA Platinum (Home + Imports): dark showroom, standard KYRA red accent.
+  Scoped via data-platinum-theme on page roots.
+*/
+body:has([data-platinum-theme]) {
+  --background: #060607;
+  --foreground: #f0f0f2;
+  --muted: #101012;
+  --muted-foreground: #a8a8ae;
+  --border: #262628;
+  --panel: #141416;
+  --kyra-steel: #9a9aa0;
+  --hero-glow: rgba(226, 19, 31, 0.16);
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow-premium: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --shadow-lift: 0 32px 64px rgba(226, 19, 31, 0.18);
+}
+
+body:has([data-platinum-theme]) header .nav-link-theme {
+  color: rgb(240 240 242 / 0.7);
+}
+
+body:has([data-platinum-theme]) header .nav-link-theme:hover {
+  color: #f0f0f2;
+}
+
+body:has([data-platinum-theme]) header .nav-burger-bar {
+  background-color: #f0f0f2;
+}
+
+body:has([data-platinum-theme]) header .kyra-brand-wordmark-main {
+  color: #ffffff;
+}
+
+body:has([data-platinum-theme]) header .kyra-brand-tagline {
+  color: rgb(255 255 255 / 0.55);
+}
+
+body:has([data-platinum-theme]) header .kyra-brand-logo-wrap {
+  background: rgb(0 0 0 / 0.7);
+}
+
+body:has([data-platinum-theme]) header .kyra-brand-logo-wrap img {
+  mix-blend-mode: normal;
+  filter: brightness(1.08) contrast(1.05);
+}
+
+/* Logo wall assets are dark marks; invert on platinum dark surfaces. */
+body:has([data-platinum-theme]) .brand-logo-mark:not(.brand-logo-mark--native-light) {
+  filter: brightness(0) invert(1);
+  opacity: 0.88;
+}
+
+body:has([data-platinum-theme]) .brand-logo-mark--native-light {
+  filter: none;
+  opacity: 0.92;
+}
+
+body:has([data-platinum-theme]) .makes-marquee__item:hover .brand-logo-mark,
+body:has([data-platinum-theme]) .makes-strip-logos button:hover .brand-logo-mark,
+body:has([data-platinum-theme]) .makes-strip-logos a:hover .brand-logo-mark {
+  opacity: 1;
 }
 
 

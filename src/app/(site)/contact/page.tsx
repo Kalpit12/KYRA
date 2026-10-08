@@ -18,7 +18,7 @@ export default function ContactPage() {
   return (
     <Suspense
       fallback={
-        <div className="section-padding bg-background">
+        <div data-platinum-theme className="section-padding bg-background">
           <div className="container-kyra py-24 text-center font-mono text-xs tracking-[0.12em] text-kyra-steel uppercase">
             Loading…
           </div>

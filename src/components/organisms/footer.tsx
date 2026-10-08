@@ -128,20 +128,28 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row">
-            <p className="text-xs text-muted-foreground">
+          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 md:flex-row md:items-center">
+            <p className="text-center text-xs text-muted-foreground md:text-left">
               © {new Date().getFullYear()} KYRA. All rights reserved.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-5">
+              <p className="text-center text-xs leading-relaxed text-muted-foreground sm:text-right">
+                Made with precision by{" "}
+                <a
+                  href="https://nexfloratech.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground/90 underline-offset-2 transition-colors hover:text-kyra-red hover:underline"
+                >
+                  NexfloraTech
+                </a>
+              </p>
               <Link
                 href="/admin"
                 className="font-mono text-[10px] tracking-[0.14em] text-muted-foreground uppercase transition-colors hover:text-kyra-red"
               >
                 Admin
               </Link>
-              <p className="text-xs text-muted-foreground">
-                Crafted with precision by Nexora Digital
-              </p>
             </div>
           </div>
         </div>

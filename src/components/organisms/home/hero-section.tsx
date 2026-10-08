@@ -131,6 +131,11 @@ export function HeroSection() {
       className="relative flex min-h-0 items-center overflow-hidden bg-black pt-24 pb-12 md:min-h-screen md:pt-[110px] md:pb-20"
     >
       <HeroBackground />
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-black/55 via-black/20 to-transparent md:h-36"
+        aria-hidden
+      />
+      <div className="hero-fade-to-section hero-fade-to-section--tall" aria-hidden />
       <div className="hero-accent-bar hidden lg:block" aria-hidden />
 
       <div className="container-kyra relative z-10 px-6 md:px-12 lg:px-20">
@@ -235,7 +240,7 @@ export function HeroSection() {
                 </div>
                 <Link
                   href="/imports"
-                  className="btn-cut-tr w-full shrink-0 bg-white px-4 py-3 text-center font-display text-[11px] font-semibold tracking-[0.08em] text-foreground uppercase transition hover:bg-kyra-red hover:text-white sm:w-auto sm:py-2.5"
+                  className="btn-cut-tr w-full shrink-0 bg-white px-4 py-3 text-center font-display text-[11px] font-semibold tracking-[0.08em] text-[#121214] uppercase transition hover:bg-kyra-red hover:text-white sm:w-auto sm:py-2.5"
                 >
                   View Stock
                 </Link>

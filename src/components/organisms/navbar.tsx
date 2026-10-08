@@ -30,10 +30,16 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "";
+  const isImportsHub = pathname === "/imports";
+  const isPlatinumHub =
+    isHome ||
+    isImportsHub ||
+    pathname === "/about" ||
+    pathname === "/contact";
   // Client path for class toggles; SSR contrast uses CSS :has(section[data-nav-theme=dark])
   const isCustoms = pathname === "/customs" || pathname.startsWith("/customs/");
   const isWash = pathname === "/wash" || pathname.startsWith("/wash/");
-  const lightOverHero = (isHome && !isScrolled) || isCustoms || isWash;
+  const lightOverHero = isPlatinumHub || isCustoms || isWash;
 
   useEffect(() => {
     let ticking = false;

@@ -105,7 +105,7 @@ export function ContactPageContent() {
   };
 
   return (
-    <>
+    <div data-platinum-theme>
       <PageHero
         eyebrow="Get in Touch"
         title="Contact KYRA"
@@ -281,6 +281,6 @@ export function ContactPageContent() {
       </section>
 
       <ContactExploreBand />
-    </>
+    </div>
   );
 }

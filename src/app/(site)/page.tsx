@@ -15,7 +15,7 @@ export default async function HomePage() {
   const featured = await getFeaturedVehicles();
 
   return (
-    <>
+    <div data-platinum-theme>
       <SiteJsonLd />
       <HeroSection />
       <MakesStrip centered />
@@ -25,6 +25,6 @@ export default async function HomePage() {
       <FeaturedWrapsSection />
       <TestimonialsSection />
       <ContactCtaSection />
-    </>
+    </div>
   );
 }

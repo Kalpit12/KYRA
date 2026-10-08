@@ -31,9 +31,11 @@ export function PageHero({
 }: PageHeroProps) {
   const lightOnMedia = Boolean((backgroundVideo || backgroundImage) && !overlay);
 
+  const darkHeaderOverHero = Boolean(backgroundVideo || backgroundImage);
+
   return (
     <section
-      {...(lightOnMedia ? { "data-nav-theme": "dark" } : {})}
+      {...(darkHeaderOverHero ? { "data-nav-theme": "dark" } : {})}
       className={cn(
         "relative flex min-h-[38vh] items-end overflow-hidden pt-24 pb-12 md:min-h-[52vh] md:pt-[110px] md:pb-16",
         backgroundVideo && "min-h-[52vh] md:min-h-[68vh]",
@@ -48,7 +50,15 @@ export function PageHero({
               <div className="absolute inset-0 bg-gradient-to-t from-background from-25% via-background/75 via-45% to-background/25" />
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--hero-glow),transparent_55%)]" />
             </>
-          ) : null}
+          ) : (
+            <>
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-black/50 via-black/15 to-transparent md:h-32"
+                aria-hidden
+              />
+              <div className="hero-fade-to-section" aria-hidden />
+            </>
+          )}
         </>
       ) : backgroundImage ? (
         <>
@@ -65,7 +75,15 @@ export function PageHero({
                   : "bg-gradient-to-t from-background via-background/85 to-background/50"
               )}
             />
-          ) : null}
+          ) : (
+            <>
+              <div
+                className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-black/50 via-black/15 to-transparent md:h-32"
+                aria-hidden
+              />
+              <div className="hero-fade-to-section" aria-hidden />
+            </>
+          )}
         </>
       ) : (
         <div

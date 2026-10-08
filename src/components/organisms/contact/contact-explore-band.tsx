@@ -7,7 +7,7 @@ import { contactExplore } from "@/lib/data/contact";
 
 export function ContactExploreBand() {
   return (
-    <section className="border-t border-border bg-foreground text-background">
+    <section className="border-t border-border bg-muted">
       <div className="container-kyra section-padding !py-12 md:!py-16">
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between lg:gap-16">
           <motion.div
@@ -23,12 +23,12 @@ export function ContactExploreBand() {
             <h2 className="mt-3 font-display text-[clamp(1.5rem,3vw,2.25rem)] font-semibold italic uppercase">
               {contactExplore.title}
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-white/70">
+            <p className="mt-3 text-sm leading-relaxed text-kyra-steel">
               {contactExplore.subtitle}
             </p>
           </motion.div>
 
-          <div className="grid flex-1 gap-px bg-white/10 sm:grid-cols-3">
+          <div className="grid flex-1 gap-px border border-border bg-border sm:grid-cols-3">
             {contactExplore.links.map((link, index) => (
               <motion.div
                 key={link.id}
@@ -43,13 +43,13 @@ export function ContactExploreBand() {
               >
                 <Link
                   href={link.href}
-                  className="group flex h-full flex-col justify-between bg-foreground px-5 py-6 transition-colors hover:bg-white/[0.04] sm:px-6"
+                  className="group flex h-full flex-col justify-between bg-background px-5 py-6 transition-colors hover:bg-panel sm:px-6"
                 >
                   <div>
                     <p className="font-mono text-[10px] tracking-[0.14em] text-kyra-steel uppercase">
                       {link.description}
                     </p>
-                    <p className="mt-2 font-display text-lg font-semibold italic uppercase text-white">
+                    <p className="mt-2 font-display text-lg font-semibold italic uppercase text-foreground">
                       {link.label}
                     </p>
                   </div>

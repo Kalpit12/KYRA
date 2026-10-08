@@ -26,7 +26,7 @@ const fadeUp = {
 
 export function AboutContent() {
   return (
-    <>
+    <div data-platinum-theme>
       <PageHero
         eyebrow="Our Story"
         title="About KYRA"
@@ -192,6 +192,6 @@ export function AboutContent() {
       <AboutLocationSection />
       <AboutStandardBand />
       <AboutCtaSection />
-    </>
+    </div>
   );
 }

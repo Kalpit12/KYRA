@@ -12,7 +12,7 @@ export type BrandLogoId =
 
 const BRAND_ASSETS: Record<
   BrandLogoId,
-  { src: string; width: number; height: number }
+  { src: string; lightSrc?: string; width: number; height: number }
 > = {
   "Mercedes-Benz": {
     src: "/brands/mercedes.png?v=6",
@@ -28,20 +28,34 @@ const BRAND_ASSETS: Record<
     width: 220,
     height: 100,
   },
-  Nissan: { src: "/brands/nissan.png?v=1", width: 240, height: 140 },
+  Nissan: {
+    src: "/brands/nissan.png?v=1",
+    lightSrc: "/brands/nissan-light.png?v=1",
+    width: 240,
+    height: 140,
+  },
 };
 
 interface BrandLogoProps {
   brand: string;
   className?: string;
   title?: string;
+  /** Dark showroom surfaces (Home / Imports). */
+  variant?: "default" | "platinum";
 }
 
 /** Brand marks from `/public/brands` — sized for the logo wall. */
-export function BrandLogo({ brand, className, title }: BrandLogoProps) {
+export function BrandLogo({
+  brand,
+  className,
+  title,
+  variant = "default",
+}: BrandLogoProps) {
   const id = (normalizeBrand(brand.trim()) || brand.trim()) as BrandLogoId;
   const label = title ?? brand;
   const asset = BRAND_ASSETS[id];
+  const onPlatinum = variant === "platinum";
+  const useNativeLight = onPlatinum && Boolean(asset?.lightSrc);
 
   return (
     <span
@@ -54,13 +68,16 @@ export function BrandLogo({ brand, className, title }: BrandLogoProps) {
     >
       {asset ? (
         <img
-          src={asset.src}
+          src={useNativeLight ? asset.lightSrc! : asset.src}
           alt=""
           title={label}
           width={asset.width}
           height={asset.height}
           draggable={false}
-          className="h-[90%] w-auto max-w-full object-contain"
+          className={cn(
+            "brand-logo-mark h-[90%] w-auto max-w-full object-contain",
+            useNativeLight && "brand-logo-mark--native-light"
+          )}
           aria-hidden
         />
       ) : (
