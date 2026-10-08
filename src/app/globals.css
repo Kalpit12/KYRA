@@ -310,11 +310,17 @@ h4 {
 
 .vehicle-gallery-thumbs {
   scrollbar-width: thin;
-  scrollbar-color: var(--kyra-steel) var(--muted);
+  scrollbar-color: var(--kyra-red) var(--muted);
 }
 
 .vehicle-gallery-thumbs::-webkit-scrollbar {
-  height: 7px;
+  height: 8px;
+}
+
+.vehicle-gallery-thumbs::-webkit-scrollbar-button {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .vehicle-gallery-thumbs::-webkit-scrollbar-track {
@@ -323,30 +329,30 @@ h4 {
 }
 
 .vehicle-gallery-thumbs::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--kyra-steel) 85%, var(--foreground) 15%);
+  background: var(--kyra-red);
   border-radius: 999px;
   border: 2px solid var(--muted);
 }
 
 .vehicle-gallery-thumbs::-webkit-scrollbar-thumb:hover {
-  background: var(--kyra-red);
+  background: var(--kyra-red-hover);
 }
 
 .vehicle-gallery-thumbs--lightbox {
-  scrollbar-color: rgb(255 255 255 / 0.35) rgb(255 255 255 / 0.08);
+  scrollbar-color: var(--kyra-red) rgb(255 255 255 / 0.1);
 }
 
 .vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-track {
-  background: rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.1);
 }
 
 .vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-thumb {
-  background: rgb(255 255 255 / 0.35);
-  border-color: rgb(255 255 255 / 0.08);
+  background: var(--kyra-red);
+  border-color: rgb(255 255 255 / 0.1);
 }
 
 .vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-thumb:hover {
-  background: var(--kyra-red);
+  background: var(--kyra-red-hover);
 }
 
 .hero-shard::before {

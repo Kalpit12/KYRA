@@ -17,8 +17,9 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
   const gallery = images.length > 0 ? images : [];
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
-  const [slideshowPaused, setSlideshowPaused] = useState(false);
+  const [manualPaused, setManualPaused] = useState(false);
   const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const manualPauseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const count = gallery.length;
   const current = count > 0 ? Math.min(active, count - 1) : 0;
@@ -34,8 +35,25 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
     [count]
   );
 
+  const pauseSlideshowBriefly = useCallback(() => {
+    setManualPaused(true);
+    if (manualPauseTimer.current) {
+      clearTimeout(manualPauseTimer.current);
+    }
+    manualPauseTimer.current = setTimeout(() => {
+      setManualPaused(false);
+      manualPauseTimer.current = null;
+    }, SLIDE_INTERVAL_MS * 2);
+  }, []);
+
   useEffect(() => {
-    if (count < 2 || lightbox || slideshowPaused) return;
+    return () => {
+      if (manualPauseTimer.current) clearTimeout(manualPauseTimer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (count < 2 || lightbox || manualPaused) return;
 
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
@@ -47,7 +65,18 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
     }, SLIDE_INTERVAL_MS);
 
     return () => window.clearInterval(id);
-  }, [count, lightbox, slideshowPaused]);
+  }, [count, lightbox, manualPaused]);
+
+  useEffect(() => {
+    if (lightbox) return;
+
+    const onVisibility = () => {
+      if (document.hidden) setManualPaused(true);
+      else setManualPaused(false);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [lightbox]);
 
   useEffect(() => {
     thumbRefs.current[current]?.scrollIntoView({
@@ -78,17 +107,7 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
 
   return (
     <>
-      <div
-        className="relative"
-        onMouseEnter={() => setSlideshowPaused(true)}
-        onMouseLeave={() => setSlideshowPaused(false)}
-        onFocusCapture={() => setSlideshowPaused(true)}
-        onBlurCapture={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-            setSlideshowPaused(false);
-          }
-        }}
-      >
+      <div className="relative">
         <button
           type="button"
           onClick={() => setLightbox(true)}
@@ -129,7 +148,10 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
                   thumbRefs.current[index] = el;
                 }}
                 type="button"
-                onClick={() => setActive(index)}
+                onClick={() => {
+                  setActive(index);
+                  pauseSlideshowBriefly();
+                }}
                 aria-label={`Show photo ${index + 1}`}
                 aria-current={index === current}
                 className={cn(
@@ -214,7 +236,10 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
                 <button
                   key={`lb-${image}-${index}`}
                   type="button"
-                  onClick={() => setActive(index)}
+                  onClick={() => {
+                  setActive(index);
+                  pauseSlideshowBriefly();
+                }}
                   aria-label={`Show photo ${index + 1}`}
                   className={cn(
                     "relative h-14 w-20 shrink-0 overflow-hidden border",
