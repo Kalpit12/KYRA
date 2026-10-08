@@ -308,6 +308,47 @@ h4 {
   background: linear-gradient(to left, var(--muted), transparent);
 }
 
+.vehicle-gallery-thumbs {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kyra-steel) var(--muted);
+}
+
+.vehicle-gallery-thumbs::-webkit-scrollbar {
+  height: 7px;
+}
+
+.vehicle-gallery-thumbs::-webkit-scrollbar-track {
+  background: var(--muted);
+  border-radius: 999px;
+}
+
+.vehicle-gallery-thumbs::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--kyra-steel) 85%, var(--foreground) 15%);
+  border-radius: 999px;
+  border: 2px solid var(--muted);
+}
+
+.vehicle-gallery-thumbs::-webkit-scrollbar-thumb:hover {
+  background: var(--kyra-red);
+}
+
+.vehicle-gallery-thumbs--lightbox {
+  scrollbar-color: rgb(255 255 255 / 0.35) rgb(255 255 255 / 0.08);
+}
+
+.vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-track {
+  background: rgb(255 255 255 / 0.08);
+}
+
+.vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-thumb {
+  background: rgb(255 255 255 / 0.35);
+  border-color: rgb(255 255 255 / 0.08);
+}
+
+.vehicle-gallery-thumbs--lightbox::-webkit-scrollbar-thumb:hover {
+  background: var(--kyra-red);
+}
+
 .hero-shard::before {
   /* Soft white edge lining along the diagonal cut */
   content: "";

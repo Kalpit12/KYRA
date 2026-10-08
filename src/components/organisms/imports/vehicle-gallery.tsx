@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollLock } from "@/lib/hooks/use-scroll-lock";
+
+const SLIDE_INTERVAL_MS = 3000;
 
 interface VehicleGalleryProps {
   images: string[];
@@ -15,6 +17,8 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
   const gallery = images.length > 0 ? images : [];
   const [active, setActive] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [slideshowPaused, setSlideshowPaused] = useState(false);
+  const thumbRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const count = gallery.length;
   const current = count > 0 ? Math.min(active, count - 1) : 0;
@@ -29,6 +33,29 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
     },
     [count]
   );
+
+  useEffect(() => {
+    if (count < 2 || lightbox || slideshowPaused) return;
+
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reduceMotion) return;
+
+    const id = window.setInterval(() => {
+      setActive((prev) => (prev + 1) % count);
+    }, SLIDE_INTERVAL_MS);
+
+    return () => window.clearInterval(id);
+  }, [count, lightbox, slideshowPaused]);
+
+  useEffect(() => {
+    thumbRefs.current[current]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "nearest",
+      block: "nearest",
+    });
+  }, [current]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -51,7 +78,17 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
 
   return (
     <>
-      <div className="relative">
+      <div
+        className="relative"
+        onMouseEnter={() => setSlideshowPaused(true)}
+        onMouseLeave={() => setSlideshowPaused(false)}
+        onFocusCapture={() => setSlideshowPaused(true)}
+        onBlurCapture={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+            setSlideshowPaused(false);
+          }
+        }}
+      >
         <button
           type="button"
           onClick={() => setLightbox(true)}
@@ -59,12 +96,13 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
           aria-label={`Open gallery — ${alt}`}
         >
           <Image
+            key={src}
             src={src}
             alt={alt}
             width={960}
             height={600}
             className="photo-angular aspect-[16/10] h-auto w-full object-cover"
-            priority
+            priority={current === 0}
             sizes="(max-width: 1024px) 100vw, 50vw"
           />
           <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 border border-white/40 bg-black/55 px-2.5 py-1.5 font-mono text-[10px] tracking-[0.14em] text-white uppercase opacity-90 transition group-hover:opacity-100">
@@ -80,10 +118,16 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
         />
 
         {count > 1 && (
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scroll-fade-x">
+          <div
+            className="vehicle-gallery-thumbs mt-3 flex gap-2 overflow-x-auto pb-2 scroll-fade-x"
+            aria-label="Gallery thumbnails"
+          >
             {gallery.map((image, index) => (
               <button
                 key={`${image}-${index}`}
+                ref={(el) => {
+                  thumbRefs.current[index] = el;
+                }}
                 type="button"
                 onClick={() => setActive(index)}
                 aria-label={`Show photo ${index + 1}`}
@@ -165,7 +209,7 @@ export function VehicleGallery({ images, alt }: VehicleGalleryProps) {
           </div>
 
           {count > 1 && (
-            <div className="flex justify-center gap-2 overflow-x-auto border-t border-white/10 px-4 py-3">
+            <div className="vehicle-gallery-thumbs vehicle-gallery-thumbs--lightbox flex justify-center gap-2 overflow-x-auto border-t border-white/10 px-4 py-3">
               {gallery.map((image, index) => (
                 <button
                   key={`lb-${image}-${index}`}
