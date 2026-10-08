@@ -116,7 +116,7 @@ export default async function VehicleDetailPage({ params }: PageProps) {
   };
 
   return (
-    <>
+    <div data-platinum-theme className="bg-background">
       <VehicleJsonLd vehicle={vehicle} />
       <section className="pt-24 pb-12 md:pt-[110px] md:pb-16">
         <div className="container-kyra px-6 md:px-12 lg:px-20">
@@ -250,6 +250,6 @@ export default async function VehicleDetailPage({ params }: PageProps) {
           }),
         }}
       />
-    </>
+    </div>
   );
 }

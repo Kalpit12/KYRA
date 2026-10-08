@@ -30,10 +30,11 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const isHome = pathname === "/" || pathname === "";
-  const isImportsHub = pathname === "/imports";
+  const isImportsRoute =
+    pathname === "/imports" || pathname.startsWith("/imports/");
   const isPlatinumHub =
     isHome ||
-    isImportsHub ||
+    isImportsRoute ||
     pathname === "/about" ||
     pathname === "/contact";
   // Client path for class toggles; SSR contrast uses CSS :has(section[data-nav-theme=dark])
